@@ -1,0 +1,196 @@
+<nav>
+    <!-- start: MAIN NAVIGATION MENU -->
+    <div class="navbar-title">
+        <span>Main Navigation</span>
+    </div>
+    <ul class="main-navigation-menu">
+        {#        <li>#}
+        {#            <a href="{% url 'superadmin_console' %}">#}
+        {#                <div class="item-content">#}
+        {#                    <div class="item-media">#}
+        {#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-home"></i></span></div>#}
+        {#											<div class="lettericon" data-text="Панель управления" data-size="sm" data-char-count="2"></div>#}
+        {#                    </div>#}
+        {#                    <div class="item-inner">#}
+        {#                        <span class="title"> Панель управления </span>#}
+        {#                    </div>#}
+        {#                </div> </a>#}
+        {#        </li>#}
+        <li {% if '/crm/project/' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'control:crm_project_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-university"></i></span></div>
+                        {#											<div class="lettericon" data-text="Принять заказ" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Проекты </span>
+                    </div>
+                </div> </a>
+        </li>
+        <li {% if '/director/director/' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'control:director_director_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-truck"></i></span></div>
+                        {#											<div class="lettericon" data-text="Принять заказ" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Поставщики </span>
+                    </div>
+                </div> </a>
+        </li>
+        <li {% if 'catalog/delete/list/' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'catalog-delete-list' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-database"></i></span></div>
+                        {#											<div class="lettericon" data-text="Принять заказ" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Каталоги для удаления </span>
+                    </div>
+                </div> </a>
+        </li>
+
+    <li {% if '/crm/industry/' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'control:crm_industry_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-compass"></i></span></div>
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Отрасли </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li {% if 'templateorderpaymentstatus' in request.META.PATH_INFO or 'templateordertype' in request.META.PATH_INFO or 'templateorderstatus' in request.META.PATH_INFO or 'templateemployeetype' in request.META.PATH_INFO or 'templateblock' in request.META.PATH_INFO or 'templatedictionary' in request.META.PATH_INFO or 'templateclientstatus' in request.META.PATH_INFO or 'templateclienttype' in request.META.PATH_INFO  %}class="active"{% endif %}>
+            <a href="javascript:void(0)">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-file-text-o"></i></span></div>
+                        {#											<div class="lettericon" data-text="Клиенты" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Шаблоны </span><i class="icon-arrow"></i>
+                    </div>
+                </div> </a>
+            <ul class="sub-menu">
+                <li {% if 'templateblock' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:crm_templateblock_changelist' %}"> <span class="title"> Этапы заказа </span> </a>
+                </li>
+                <li {% if 'templatedictionary' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:crm_templatedictionary_changelist' %}"> <span class="title"> Словари </span> </a>
+                </li>
+                <li {% if 'templateemployeetype' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:crm_templateemployeetype_changelist' %}"> <span class="title"> Роли сотрудников </span> </a>
+                </li>
+                <li {% if 'templateclientstatus' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:crm_templateclientstatus_changelist' %}"> <span class="title"> Статусы клиентов </span> </a>
+                </li>
+                <li {% if 'templateclienttype' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:crm_templateclienttype_changelist' %}"> <span class="title"> Типы клиентов </span> </a>
+                </li>
+
+                <li {% if 'templateorderstatus' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:crm_templateorderstatus_changelist' %}"> <span class="title"> Статусы заказов </span> </a>
+                </li>
+                <li {% if 'templateordertype' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:crm_templateordertype_changelist' %}"> <span class="title"> Типы заказов </span> </a>
+                </li>
+                <li {% if 'templateorderpaymentstatus' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:crm_templateorderpaymentstatus_changelist' %}"> <span class="title"> Статусы оплаты заказов </span> </a>
+                </li>
+                <li {% if 'templatenotification' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'control:notifications_templatenotification_changelist' %}"> <span class="title"> Шаблоны оповещений </span> </a>
+                </li>
+            </ul>
+        </li>
+
+        <li>
+            <a href="{% url 'control:billing_tariff_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-ticket"></i></span></div>
+                        {#											<div class="lettericon" data-text="Календарь" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Тарифы </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-database"></i></span></div>
+                        {#											<div class="lettericon" data-text="Карта" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Счета </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li>
+            <a href="{% url 'control:crm_crmsettings_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-cogs"></i></span></div>
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Настройки </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li>
+            <a href="{% url 'control:crm_crmsettingsmeta_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-tags"></i></span></div>
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Meta и Favicon </span>
+                    </div>
+                </div> </a>
+        </li>
+
+
+<li>
+            <a href="{% url 'control:feedback_feedbackdepartment_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-envelope"></i></span></div>
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Обратная связь </span>
+                    </div>
+                </div> </a>
+        </li>
+
+    </ul>
+
+    <!-- end: MAIN NAVIGATION MENU -->
+    <!-- start: CORE FEATURES -->
+    <div class="navbar-title">
+        <span>Core Features</span>
+    </div>
+    <ul class="folders">
+        <li>
+            <a href="#">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-question"></i></span></div>
+                        {#											<div class="lettericon" data-text="Помощь" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Помощь </span>
+                    </div>
+                </div> </a>
+        </li>
+    </ul>
+    <!-- end: CORE FEATURES -->
+</nav>

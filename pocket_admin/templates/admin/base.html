@@ -1,0 +1,417 @@
+{% load i18n admin_static bootstrapped_goodies_tags %}
+{#{% load i18n admin_static bootstrapped_goodies_tags crm_meta feedback_tags %}#}
+<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<!-- Template Name: Packet - Responsive Admin Template build with Twitter Bootstrap 3.x | Author: ClipTheme -->
+<!--[if IE 8]><html class="ie8" lang="{{ LANGUAGE_CODE|default:"en-us" }}"><![endif]-->
+<!--[if IE 9]><html class="ie9" lang="{{ LANGUAGE_CODE|default:"en-us" }}"><![endif]-->
+<!--[if !IE]><!-->
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<!--<![endif]-->
+<!-- start: HEAD -->
+<head>
+{#    {% meta_favicon %}#}
+        <title>{% block title %}{% endblock %}</title>
+    {#    <!-- Favicon -->#}
+    {#    <link rel="icon" type="image/png" href="{% static "img/favicon.png" %}" />#}
+    <!-- start: META -->
+    <!--[if IE]><meta http-equiv='X-UA-Compatible' content="IE=edge,IE=9,IE=8,chrome=1" /><![endif]-->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta content="" name="description" />
+    <meta content="" name="author" />
+    <!-- end: META -->
+    <!-- start: GOOGLE FONTS -->
+    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
+    <!-- end: GOOGLE FONTS -->
+    {% block extrastyle %}{% endblock %}
+
+    {#        <link rel="stylesheet" type="text/css" href="{% static "admin/css/overrides.css" %}" />#}
+    {% if LANGUAGE_BIDI %}
+        {#            <link href="{% static "bootstrap-rtl/css/bootstrap-rtl.min.css" %}" rel="stylesheet"/>#}
+        {#            <link href="{% static "bootstrap-rtl/css/bootstrap-flipped.min.css" %}" rel="stylesheet"/>#}
+    {% endif %}
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
+    <!-- start: MAIN CSS -->
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/bootstrap/dist/css/bootstrap.min.css" %}">
+
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/font-awesome/css/font-awesome.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/themify-icons/themify-icons.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/flag-icon-css/css/flag-icon.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/animate.css/animate.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/perfect-scrollbar/css/perfect-scrollbar.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/switchery/dist/switchery.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/seiyria-bootstrap-slider/dist/css/bootstrap-slider.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/ladda/dist/ladda-themeless.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/slick.js/slick/slick.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/slick.js/slick/slick-theme.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/select2/dist/css/select2.min.css" %}" media="screen">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.min.css" %}" media="screen">
+<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+
+    <link href="https://cdn.jsdelivr.net/jquery.suggestions/16.2.2/css/suggestions.css" type="text/css" rel="stylesheet" />
+
+    <!-- end: MAIN CSS -->
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/sweetalert/dist/sweetalert.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/toastr/toastr.min.css" %}">
+
+    <!-- start: Packet CSS -->
+    <link rel="stylesheet" href="{% static "admin/packet/assets/css/styles.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/assets/css/plugins.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/assets/css/themes/lyt1-theme-1.css" %}" id="skin_color">
+    <link rel="stylesheet" href="{% static "admin/packet/custom_style.css" %}?v=0.3" >
+    <!-- end: Packet CSS -->
+
+
+    <script type="text/javascript">
+        //<![CDATA[
+        {#            window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";#}
+        {#            window.__admin_utc_offset__ = "{% filter escapejs %}{% now "Z" %}{% endfilter %}";#}
+        //]]>
+    </script>
+
+    <!-- start: MAIN JAVASCRIPTS -->
+    <script src="{% static "admin/packet/bower_components/jquery/dist/jquery.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/jquery/dist/jquery.cookie.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/bootstrap/dist/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/components-modernizr/modernizr.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/js-cookie/src/js.cookie.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/perfect-scrollbar/js/perfect-scrollbar.jquery.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/jquery-fullscreen/jquery.fullscreen-min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/switchery/dist/switchery.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/jquery.knobe/dist/jquery.knob.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/slick.js/slick/slick.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/jquery-numerator/jquery-numerator.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/ladda/dist/spin.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/ladda/dist/ladda.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/ladda/dist/ladda.jquery.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/select2/dist/js/select2.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ru.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/bootstrap-timepicker/js/bootstrap-timepicker.js" %}"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+    <script src="{% static "admin/packet/bower_components/fileupload/js/vendor/jquery.ui.widget.js" %}"></script>
+    <!-- end: MAIN JAVASCRIPTS -->
+    <!-- start: JAVASCRIPTS REQUIRED FOR THIS PAGE ONLY -->
+    {% block extrahead %}{% endblock %}
+    <!-- end: JAVASCRIPTS REQUIRED FOR THIS PAGE ONLY -->
+
+    {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+</head>
+<!-- end: HEAD -->
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
+      data-admin-utc-offset="{% now "Z" %}">
+{#{% if not request.user.is_superuser and not  request.user.is_superadmin and not IS_LOCAL %}#}
+{#    {% include 'metrika.html' %}#}
+{#{% endif %}#}
+<div id="app">
+    <!-- sidebar -->
+    {% if not is_popup %}
+        <div class="sidebar app-aside" id="sidebar">
+            <div class="sidebar-container perfect-scrollbar">
+                <div>
+                    <!-- start: SEARCH FORM -->
+                    {#                    <div class="search-form hidden-md hidden-lg">#}
+                    {#                        <a class="s-open" href="#"> <i class="ti-search"></i> </a>#}
+                    {#                        <form class="navbar-form" role="search">#}
+                    {#                            <a class="s-remove" href="#" target=".navbar-form"> <i class="ti-close"></i> </a>#}
+                    {#                            <div class="form-group">#}
+                    {#                                <input type="text" class="form-control" placeholder="Search...">#}
+                    {#                                <button class="btn search-button" type="submit">#}
+                    {#                                    <i class="ti-search"></i>#}
+                    {#                                </button>#}
+                    {#                            </div>#}
+                    {#                        </form>#}
+                    {#                    </div>#}
+                    <!-- end: SEARCH FORM -->
+                    <!-- start: USER OPTIONS -->
+                    <div class="nav-user-wrapper">
+                        <div class="media">
+                            <div class="media-left">
+                                <span style="font-size:28px;"><i class="ti-user"></i></span>
+                                {#                                <a class="profile-card-photo" href="#"><img alt="" src="{% static "admin/packet/assets/images/avatar-1.jpg" %}"></a>#}
+                            </div>
+                            <div class="media-body">
+                                <span class="media-heading text-white">{% if request.user %}{{ request.user.username }}{% endif %}</span>
+                                <div class="text-small text-white-transparent">
+                                    {% if request.user.is_admin_project %}Администратор проекта{% endif %}
+                                </div>
+                            </div>
+                            <div class="media-right media-middle">
+                                <div class="dropdown">
+                                    <button href class="btn btn-transparent text-white dropdown-toggle" data-toggle="dropdown">
+                                        <i class="fa fa-caret-down"></i>
+                                    </button>
+                                    <ul class="dropdown-menu animated fadeInRight pull-right">
+                                        {#                                        <li>#}
+                                        {#                                            <a href="#"> My Profile </a>#}
+                                        {#                                        </li>#}
+                                        {#                                        <li>#}
+                                        {#                                            <a href="#"> My Calendar </a>#}
+                                        {#                                        </li>#}
+                                        {#                                        <li>#}
+                                        {#                                            <a href="#"> My Messages (3) </a>#}
+                                        {#                                        </li>#}
+                                        {% if user.has_usable_password %}
+                                            <li><a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a></li>
+                                        {% endif %}
+
+                                        <li class="divider"></li>
+                                        <li>
+                                            <a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end: USER OPTIONS -->
+
+                    {% if request.user.is_superuser %}
+                        {% include "admin/menu/menu_root_admin.html" %}
+                    {% elif request.user.is_superadmin %}
+                        {% include "admin/menu/menu_super_admin.html" %}
+                    {% elif request.user.project %}
+                        {% if request.user.is_admin_project %}
+                            {% include "admin/menu/menu_project_admin.html" %}
+                        {% elif request.user.is_authenticated %}
+                            {% include "admin/menu/menu_project_employee.html" %}
+                        {% endif %}
+                    {% elif request.user.director %}
+                        {% if request.user.is_admin_project %}
+                            {% include "admin/menu/menu_director_admin.html" %}
+                        {% endif %}
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!-- / sidebar -->
+    <div class="app-content">
+        <!-- start: TOP NAVBAR -->
+        {% if not is_popup %}
+            <header class="navbar navbar-default navbar-static-top">
+                <!-- start: NAVBAR HEADER -->
+                <div class="navbar-header">
+                    <button href="#" class="sidebar-mobile-toggler pull-left btn no-radius hidden-md hidden-lg" class="btn btn-navbar sidebar-toggle" data-toggle-class="app-slide-off" data-toggle-target="#app" data-toggle-click-outside="#sidebar">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <a class="navbar-brand" href="/">
+{#                        <img src="{% static "img/logo-listrada.png" %}" alt="Packet"/> #}
+                        Cripto Board
+                    </a>
+                    <a class="navbar-brand navbar-brand-collapsed" href="/">
+{#                        <img src="{% static "img/logo-listrada-collapsed.png" %}" alt="" /> #}
+                        Cripto Board
+                    </a>
+
+                    {#                    <button class="btn pull-right menu-toggler visible-xs-block" id="menu-toggler" data-toggle="collapse" href=".navbar-collapse" data-toggle-class="menu-open">#}
+                    {#                        <i class="fa fa-folder closed-icon"></i><i class="fa fa-folder-open open-icon"></i><small><i class="fa fa-caret-down margin-left-5"></i></small>#}
+                    {#                    </button>#}
+                </div>
+                <!-- end: NAVBAR HEADER -->
+                <!-- start: NAVBAR COLLAPSE -->
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-left hidden-sm hidden-xs">
+                        <li class="sidebar-toggler-wrapper">
+                            <div>
+                                <button href="javascript:void(0)" class="btn sidebar-toggler visible-md visible-lg">
+                                    <i class="fa fa-bars"></i>
+                                </button>
+                            </div>
+                        </li>
+
+                        {#							<li>#}
+                        {#								<form role="search" class="navbar-form main-search">#}
+                        {#									<div class="form-group">#}
+                        {#										<input type="text" placeholder="Enter search text here..." class="form-control">#}
+                        {#										<button class="btn search-button" type="submit">#}
+                        {#											<i class="fa fa-search"></i>#}
+                        {#										</button>#}
+                        {#									</div>#}
+                        {#								</form>#}
+                        {#							</li>#}
+                    </ul>
+
+                    <!-- start: MENU TOGGLER FOR MOBILE DEVICES -->
+                    {#                    <div class="close-handle visible-xs-block menu-toggler" data-toggle="collapse" href=".navbar-collapse">#}
+                    {#                        <div class="arrow-left"></div>#}
+                    {#                        <div class="arrow-right"></div>#}
+                    {#                    </div>#}
+                    <!-- end: MENU TOGGLER FOR MOBILE DEVICES -->
+
+                    <ul class="nav navbar-right" style="height: auto;">
+
+                        <!-- start: LANGUAGE SWITCHER -->
+                        <li >
+								<span class="project-title">
+                                    {% if request.user.is_superuser %}
+                                        Панель root администратора
+                                    {% elif request.user.is_superadmin %}
+                                        Панель суперадмина
+                                    {% elif request.user.project %}
+                                        {{ request.user.project.title }}
+                                    {% elif request.user.director %}
+                                        {{ request.user.director.title }}
+                                    {% endif %}
+
+                                     </span>
+
+                        </li>
+                        <!-- end: LANGUAGE SWITCHER -->
+                    </ul>
+                </div>
+                {#                <button class="sidebar-mobile-toggler dropdown-off-sidebar btn hidden-md hidden-lg"  data-toggle-class="app-offsidebar-open" data-toggle-target="#app" data-toggle-click-outside="#off-sidebar">#}
+                {#                    &nbsp;#}
+                {#                </button>#}
+                {#                <button class="dropdown-off-sidebar btn hidden-sm hidden-xs" data-toggle-class="app-offsidebar-open" data-toggle-target="#app" data-toggle-click-outside="#off-sidebar">#}
+                {#                    &nbsp;#}
+                {#                </button>#}
+                <!-- end: NAVBAR COLLAPSE -->
+            </header>
+        {% endif %}
+        <!-- end: TOP NAVBAR -->
+        <div class="main-content" >
+            <div class="wrap-content container" id="container">
+                {#                <!-- start: BREADCRUMB -->#}
+                {% if title %}<div class="breadcrumb-wrapper"><h4 class="mainTitle no-margin">{{ title }}</h4></div>{% endif %}
+                {#                <div class="breadcrumb-wrapper">                #}
+                {#                    {% block content_title %}{% if title %}<h4 class="mainTitle no-margin">{{ title }}</h4>{% endif %}{% endblock %}#}
+                {#                    {% block breadcrumbs %}#}
+                {#                        <ul class="pull-right breadcrumb">#}
+                {#                            <li><a href="{% url 'admin:index' %}"><i class="fa fa-home margin-right-5 text-large text-dark"></i> {% trans 'Home' %}</a></li>#}
+                {#                            {% if title %}<li>{{ title }}</li>{% endif %}#}
+                {#                        </ul>#}
+                {#                    {% endblock %}#}
+                {#                </div>#}
+                <!-- end: BREADCRUMB -->
+
+                <div id="content" class="container-fluid container-fullw {% block coltype %}colM{% endblock %}">
+
+                    {% block messages %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert-message alert-message-hide alert alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                    {{ message|capfirst }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endblock messages %}
+                    {% block pretitle %}{% endblock %}
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            {% block main_content %}
+                                <div class="panel panel-white">
+                                    <div class="panel-body">
+                                        {% block action_content %}{% endblock %}
+                                        {% block content %}
+                                            {% block object-tools %}1{% endblock %}
+                                            {{ content }}
+                                        {% endblock %}
+                                    </div>
+                                </div>
+                            {% endblock %}
+                        </div>
+                    </div>
+                    {% block sidebar %}{% endblock %}
+                    <br class="clear" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- start: FOOTER -->
+    <footer>
+        <div class="footer-inner">
+            <div class="pull-left">
+                &copy; <span class="current-year"></span><span class="text-bold text-uppercase"> Cripto Board</span>. <span>All rights reserved</span>
+            </div>
+            <div class="pull-right">
+                <span class="go-top"><i class="ti-angle-up"></i></span>
+            </div>
+            {% if not request.user.is_superuser and not request.user.is_superadmin %}
+                <div class="pull-right" id="contact-form">
+                    <button class="btn btn-primary btn-o" data-toggle="modal" data-target="#feedbackModal">
+                        Обратная связь
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </footer>
+    <!-- end: FOOTER -->
+
+</div>
+
+<!-- notify Modal -->
+<div id="notifyModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Оповещение</h4>
+            </div>
+            <div class="modal-body" id="notify-modal-content">
+                <p>Подождите, идет загрузка...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- notify modal -->
+
+<!-- start: Packet JAVASCRIPTS -->
+<script src="{% static "admin/packet/assets/js/letter-icons.js" %}"></script>
+
+{#<script src="{% static "admin/packet/assets/js/selectFx/classie.js" %}"></script>#}
+{#<script src="{% static "admin/packet/assets/js/selectFx/selectFx.js" %}"></script>#}
+{#<script src="{% static "admin/packet/assets/js/form-elements.js" %}"></script>#}
+
+<link href="{% static "admin/packet/bower_components/spectrum/spectrum.css" %}" rel="stylesheet" media="screen">
+<script src="{% static "admin/packet/bower_components/spectrum/spectrum.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/sweetalert/dist/sweetalert.min.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/toastr/toastr.min.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/jquery.maskedinput/dist/jquery.maskedinput.min.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/bb-jquery-validation/dist/jquery.validate.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/bb-jquery-validation/dist/localization/messages_ru.js" %}"></script>
+
+<!--[if lt IE 10]>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajaxtransport-xdomainrequest/1.0.1/jquery.xdomainrequest.min.js"></script>
+<![endif]-->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.suggestions/16.2.2/js/jquery.suggestions.min.js"></script>
+
+<script src="{% static "admin/packet/assets/js/main.js" %}?v=0.5"></script>
+<!-- end: Packet JAVASCRIPTS -->
+
+<!-- start: JavaScript Event Handlers for this page -->
+<script>
+    $(function () {
+        Main.init();
+    });
+{#    jQuery(document).ready(function() {#}
+{#        Main.init();        #}
+{#    });#}
+</script>
+<!-- end: JavaScript Event Handlers for this page -->
+
+{% block extrascript %}{% endblock %}
+{#{% if not request.user.is_superuser and not request.user.is_superadmin %}#}
+{#    {% feedback_form %}#}
+{#{% endif %}#}
+</body>
+</html>

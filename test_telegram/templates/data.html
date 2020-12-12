@@ -1,0 +1,7 @@
+<hr>
+{% for d in webhooks %}
+    {{ d.id }} - {{ d.method }}
+    <pre>
+    {{ d.text }}
+    </pre>
+{% endfor %}

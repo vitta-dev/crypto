@@ -1,0 +1,64 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_static admin_modify suit_tags admin_urls %}
+{% load url from future %}
+
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'admin/fancybox/jquery.fancybox.css' %}" media="all">
+  <script type="text/javascript" src="{% static 'admin/fancybox/jquery.fancybox.pack.js' %}"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $(".fancy_lnk").fancybox({
+        openEffect: 'none',
+        closeEffect	: 'none',
+        padding: 0,
+        scrolling: 'visible',
+        width: window.innerWidth - 200,
+        helpers:  {
+          overlay: {
+            locked: true
+          }
+        }
+      });
+
+      $('body').on('click', '.fancybox-iframe button[name=_save]', function(){
+        window.location.reload();
+      })
+
+    });
+  </script>
+{% endblock %}
+{% block after_field_sets %}
+  <input name="{{ IS_CHANGE_FORM }}" type="hidden" value="1" />
+  <div class="suit-tab suit-tab-blocks" style="margin: 20px 0 30px 0; ">
+    <table class="table table-striped table-bordered table-hover table-condensed">
+      <thead>
+        <tr>
+          <th scope="col" class="sortable"> Заголовок блока</th>
+          <th scope="col" class="sortable"> Тип блока</th>
+          <th scope="col" class="sortable"> Шаблон</th>
+          <th scope="col" class="sortable sorted descending"> Порядок сортировки</th>
+          <th scope="col" class="sortable"> Опубликовано</th>
+          <th scope="col" class="sortable"> Удалить</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for slot in slots %}
+        <tr >
+          <th>{{ slot.url_title|safe }}</th>
+          <th>{{ slot.url_type|safe }}</th>
+          <th>{{ slot.item.template.name }}</th>
+          <td><input class="vIntegerField" name="{{ BLOCK_FIELD_PREFIX }}-{{ slot.name }}-order-{{ slot.item.id }}" type="text" value="{{ slot.item.order }}" /></td>
+          <td><input {% if slot.item.is_published %}checked="checked"{% endif %} name="{{ BLOCK_FIELD_PREFIX }}-{{ slot.name }}-is_published-{{ slot.item.id }}" type="checkbox"></td>
+          <td><input name="{{ BLOCK_FIELD_PREFIX }}-{{ slot.name }}-deleted-{{ slot.item.id }}" type="checkbox"></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <!--сюда вывести список блоков лендинга-->
+
+
+    <div class="cl"></div>
+  </div><!--/landing_items-->
+{% endblock %}

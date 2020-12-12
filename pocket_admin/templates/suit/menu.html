@@ -1,0 +1,64 @@
+{#{% load sitetree %}#}
+{% load i18n suit_menu %}
+{% load url from suit_compat %}
+
+<nav>
+    <!-- start: MAIN NAVIGATION MENU -->
+    {#    <div class="navbar-title">#}
+    {#        <span>Main Navigation</span>#}
+    {#    </div>#}
+    <ul class="main-navigation-menu">
+
+        {% block menu_home %}
+            {% url 'admin:index' as index_url %}
+
+            <li{% if index_url == request.path %} class="active open"{% endif %}>
+                <a href="{{ index_url }}">
+                    <div class="item-content">
+                        <div class="item-media">
+                            <div class="lettericon" data-text="{% trans 'Home' %}" data-size="sm" data-char-count="2"></div>
+                        </div>
+                        <div class="item-inner">
+                            <span class="title"> {% trans 'Home' %} </span>
+                        </div>
+                    </div> </a>
+            </li>
+        {% endblock %}
+
+        {% get_menu request as app_list %}
+        {% if app_list %}
+            {% for app in app_list %}
+
+                <li{{ app.is_active|yesno:' class=active open,' }}>
+                    {#                        <a href="javascript:void(0)">#}
+                    <a href="{{ app.url }}"{{ app.blank|yesno:' target=_blank,' }}>
+                        <div class="item-content">
+                            <div class="item-media">
+                                <div class="lettericon" data-text="{% trans app.label|capfirst %}" data-size="sm" data-char-count="2"></div>
+                            </div>
+                            <div class="item-inner">
+                                <span class="title"> {% trans app.label|capfirst %} </span><i class="icon-arrow"></i>
+                            </div>
+                        </div> </a>
+
+                    {% if app.models %}
+                        <ul class="sub-menu">
+                            {% for model in app.models %}
+                                <li{{ model.is_active|yesno:' class=active,' }}>
+                                    <a href="{{ model.url }}"{{ model.blank|yesno:' target=_blank,' }}>
+                                        <span class="title">{{ model.label }}</span
+                                    </a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+
+            {% endfor %}
+        {% endif %}
+
+    </ul>
+    <!-- end: MAIN NAVIGATION MENU -->
+
+</nav>
+
+

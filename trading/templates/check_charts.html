@@ -1,0 +1,676 @@
+{% extends base_tpl %}
+{% load i18n admin_static bootstrapped_goodies_tags %}
+{% block title %}{{ market }} chart{% endblock %}
+{% block extrascript_google %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+            var data = google.visualization.arrayToDataTable([
+                {% for d, c in charts_data.items %}
+                    ['{{ d|date:"Y-m-d H:i:s" }}', {{ c.low|to_point }}, {{ c.open|to_point }}, {{ c.close|to_point }}, {{ c.high|to_point }}]{% if not forloop.last %},{% endif %}
+                {% endfor %}
+                // Treat first row as data as well.
+            ], true);
+
+
+            var options = {
+                legend: 'none',
+                backgroundColor:{stroke: '#000', strokeWidth: 1},
+                candlestick: {
+                    fallingColor: { strokeWidth: 0.5, fill: '#d9534f', stroke: '#333' }, // red
+                    risingColor: { strokeWidth: 0.5, fill: '#5a8770', stroke: '#333' }   // green
+                }
+            };
+
+
+            var chart = new google.visualization.CandlestickChart(document.getElementById('chart_div'));
+
+            chart.draw(data, options);
+        }
+    </script>
+
+{% endblock %}
+{% block extrascript %}
+    <link rel="stylesheet" href="{% static 'amcharts/style.css' %}" type="text/css">
+
+    <script src="{% static 'amcharts/amcharts.js' %}" type="text/javascript"></script>
+    <script src="{% static 'amcharts/serial.js' %}" type="text/javascript"></script>
+    <script src="{% static 'amcharts/amstock.js' %}" type="text/javascript"></script>
+
+    <script>
+
+        AmCharts.ready(function () {
+            {#generateChartData_old();#}
+            generateChartData_new();
+            createStockChart();
+        });
+
+        var chartData = [];
+
+        function generateChartData_new() {
+
+            var firstDate = new Date('{{ first_date|date:"Y" }}', '{{ first_date|date:"m" }}', '{{ first_date|date:"d" }}', '{{ first_date|date:"H" }}', '{{ first_date|date:"i" }}', '{{ first_date|date:"s" }}');
+
+            {% for d, c in charts_data.items %}
+                chartData[{{ forloop.counter0 }}] = ({
+                    date: new Date('{{ d|date:"Y" }}', '{{ d|date:"m" }}', '{{ d|date:"d" }}', '{{ d|date:"H" }}', '{{ d|date:"i" }}', '{{ d|date:"s" }}'),
+                    open: {{ c.open|to_point }},
+                    close: {{ c.close|to_point }},
+                    high: {{ c.high|to_point }},
+                    low: {{ c.low|to_point }},
+                    value: {{ c.value|to_point }},
+                    macd: {{ c.macd|to_point }},
+                    macdsignal: {{ c.macdsignal|to_point }},
+                    macdhist: {{ c.macdhist|to_point }},
+                    ema1: {{ c.ema1|to_point }},
+                    ema2: {{ c.ema2|to_point }},
+                    sma_fast: {{ c.sma_fast|to_point }},
+                    sma_slow: {{ c.sma_slow|to_point }},
+                    adx: {{ c.adx|to_point }},
+                    slowk: {{ c.slowk|to_point }},
+                    slowd: {{ c.slowd|to_point }},
+                    rsi: {{ c.rsi|to_point }}
+                });
+
+            {% endfor %}
+
+        }
+
+        function createStockChart() {
+            var chart = new AmCharts.AmStockChart();
+
+            {#chart.useUTC = true;#}
+            {#chart.shortMonthNames =	['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];#}
+
+            // As we have minutely data, we should set minPeriod to "mm"
+            var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
+            categoryAxesSettings.minPeriod = "mm";
+            {#categoryAxesSettings.groupToPeriods	= ["ss", "10ss", "30ss", "mm", "10mm", "30mm", "hh", "DD", "WW", "MM", "YYYY"];#}
+            categoryAxesSettings.groupToPeriods	= [{% for g in group_to_periods %}"{{ g }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+            chart.categoryAxesSettings = categoryAxesSettings;
+
+
+            // DATASET //////////////////////////////////////////
+            var dataSet = new AmCharts.DataSet();
+            dataSet.fieldMappings = [{
+                fromField: "open",
+                toField: "open"
+            }, {
+                fromField: "close",
+                toField: "close"
+            }, {
+                fromField: "high",
+                toField: "high"
+            }, {
+                fromField: "low",
+                toField: "low"
+            }, {
+                fromField: "value",
+                toField: "value"
+            },{
+                fromField: "macd",
+                toField: "macd"
+            }, {
+                fromField: "macdsignal",
+                toField: "macdsignal"
+            }, {
+                fromField: "macdhist",
+                toField: "macdhist"
+            }, {
+                fromField: "ema1",
+                toField: "ema1"
+            }, {
+                fromField: "ema2",
+                toField: "ema2"
+            }, {
+                fromField: "sma_fast",
+                toField: "sma_fast"
+            }, {
+                fromField: "sma_slow",
+                toField: "sma_slow"
+            }, {
+                fromField: "rsi",
+                toField: "rsi"
+            }, {
+                fromField: "adx",
+                toField: "adx"
+            }, {
+                fromField: "slowk",
+                toField: "slowk"
+            }, {
+                fromField: "slowd",
+                toField: "slowd"
+            }
+            ];
+            dataSet.color = "#7f8da9";
+            dataSet.dataProvider = chartData;
+            dataSet.title = "{{ market }}";
+            dataSet.categoryField = "date";
+
+            chart.dataSets = [dataSet];
+
+            // PANELS ///////////////////////////////////////////
+            var stockPanel = new AmCharts.StockPanel();
+            stockPanel.title = "";
+            stockPanel.showCategoryAxis = false;
+            stockPanel.percentHeight = 60;
+            stockPanel.comparable = true;
+            stockPanel.compareField = "value";
+
+            var valueAxis = new AmCharts.ValueAxis();
+            valueAxis.dashLength = 5;
+            stockPanel.addValueAxis(valueAxis);
+
+            stockPanel.categoryAxis.dashLength = 5;
+
+            // graph of first stock panel
+            var graph = new AmCharts.StockGraph();
+            graph.type = "candlestick";
+            graph.columnWidth = 0.7;
+            graph.openField = "open";
+            graph.closeField = "close";
+            graph.highField = "high";
+            graph.lowField = "low";
+            graph.valueField = "close";
+            graph.lineColor = "#5a8770";
+            graph.filledColors = "#5a8770";
+            graph.negativeLineColor = "#db4c3c";
+            graph.negativeFillColors = "#db4c3c";
+            {#graph.proCandlesticks = true;#}
+            graph.fillAlphas = 1;
+            graph.balloonText = "o:<b>[[open]]</b><br>c:<b>[[close]]</b><br>l:<b>[[low]]</b><br>h:<b>[[high]]</b>";
+            graph.useDataSetColors = false;
+            {#graph.comparable = true;#}
+            {#graph.compareField = "value";#}
+            graph.showBalloon = true;
+            stockPanel.addStockGraph(graph);
+
+            var stockLegend = new AmCharts.StockLegend();
+
+            stockLegend.valueTextRegular = undefined;
+            stockLegend.periodValueTextComparing = "[[value.close]]";
+            stockPanel.stockLegend = stockLegend;
+
+            var chartCursor = new AmCharts.ChartCursor();
+            chartCursor.valueLineEnabled = true;
+            chartCursor.valueLineAxis = valueAxis;
+
+            chartCursor.valueBalloonsEnabled = true;
+            chartCursor.fullWidth = true;
+            chartCursor.cursorAlpha = 0.1;
+            chartCursor.valueLineBalloonEnabled = true;
+            chartCursor.valueLineEnabled = true;
+            chartCursor.valueLineAlpha = 0.5;
+
+
+            var graph_ema1 = new AmCharts.StockGraph();
+            graph_ema1.title = "EMA 7";
+            graph_ema1.valueField = "ema1";
+            graph_ema1.type = "line";
+            graph_ema1.color = "#fffd1e";
+            graph_ema1.lineColor = "#fffd1e";
+            graph_ema1.showBalloon = false;
+            graph_ema1.useDataSetColors = false;
+            stockPanel.addStockGraph(graph_ema1);
+
+            var graph_ema2 = new AmCharts.StockGraph();
+            graph_ema2.title = "EMA 26";
+            graph_ema2.valueField = "ema2";
+            graph_ema2.type = "line";
+            graph_ema2.color = "#1313ff";
+            graph_ema2.lineColor = "#1313ff";
+            graph_ema2.showBalloon = false;
+            graph_ema2.useDataSetColors = false;
+            stockPanel.addStockGraph(graph_ema2);
+
+
+            var graph_sma1 = new AmCharts.StockGraph();
+            graph_sma1.title = "SMA fast";
+            graph_sma1.valueField = "sma_fast";
+            graph_sma1.type = "line";
+            graph_sma1.color = "#2bc9a1";
+            graph_sma1.lineColor = "#2bc9a1";
+            graph_sma1.showBalloon = false;
+            graph_sma1.useDataSetColors = false;
+            stockPanel.addStockGraph(graph_sma1);
+
+            var graph_sma2 = new AmCharts.StockGraph();
+            graph_sma2.title = "SMA slow";
+            graph_sma2.valueField = "sma_slow";
+            graph_sma2.type = "line";
+            graph_sma2.color = "#ac0000";
+            graph_sma2.lineColor = "#ac0000";
+            graph_sma2.showBalloon = false;
+            graph_sma2.useDataSetColors = false;
+            stockPanel.addStockGraph(graph_sma2);
+
+            {#var graph2 = new AmCharts.StockGraph();#}
+            {#graph2.valueField = "value";#}
+            {#graph2.type = "column";#}
+            {#graph2.showBalloon = false;#}
+            {#graph2.fillAlphas = 0.3;#}
+            {#stockPanel.addStockGraph(graph2);#}
+
+            stockPanel.chartCursor = chartCursor;
+
+            // Panel2
+            {#var stockPanel2 = new AmCharts.StockPanel();#}
+            {#stockPanel2.title = "Value";#}
+            {#stockPanel2.percentHeight = 30;#}
+            {#stockPanel2.marginTop = 1;#}
+            {#stockPanel2.showCategoryAxis = true;#}
+            {##}
+            {#var valueAxis2 = new AmCharts.ValueAxis();#}
+            {#valueAxis2.dashLength = 5;#}
+            {#stockPanel2.addValueAxis(valueAxis2);#}
+            {##}
+            {#stockPanel2.categoryAxis.dashLength = 5;#}
+            {##}
+            {#var graph2 = new AmCharts.StockGraph();#}
+            {#graph2.valueField = "value";#}
+            {#graph2.type = "column";#}
+            {#graph2.showBalloon = false;#}
+            {#graph2.fillAlphas = 0.3;#}
+            {#stockPanel2.addStockGraph(graph2);#}
+            {##}
+            {#var legend2 = new AmCharts.StockLegend();#}
+            {#legend2.markerType = "none";#}
+            {#legend2.markerSize = 0;#}
+            {#legend2.labelText = "";#}
+            {#legend2.periodValueTextRegular = "[[value.close]]";#}
+            {#stockPanel2.stockLegend = legend2;#}
+            {##}
+            {#var chartCursor2 = new AmCharts.ChartCursor();#}
+            {#chartCursor2.valueLineEnabled = true;#}
+            {#chartCursor2.valueLineAxis = valueAxis2;#}
+            {#stockPanel2.chartCursor = chartCursor2;#}
+
+            chart.panels = [stockPanel];
+
+            {% if bot.is_macd %}
+            /// panel macd
+            var stockPanel3 = new AmCharts.StockPanel();
+            stockPanel3.title = "MACD chart";
+            stockPanel3.percentHeight = 60;
+            stockPanel3.marginTop = 1;
+            stockPanel3.showCategoryAxis = true;
+
+            var valueAxis3 = new AmCharts.ValueAxis();
+            valueAxis3.dashLength = 5;
+            stockPanel3.addValueAxis(valueAxis3);
+
+            stockPanel3.categoryAxis.dashLength = 5;
+
+            var graph3 = new AmCharts.StockGraph();
+            graph3.valueField = "macd";
+            graph3.type = "line";
+            graph3.color = "#2ec90c";
+            graph3.lineColor = "#2ec90c";
+            {#graph3.#}
+            graph3.showBalloon = false;
+            {#graph3.fillAlphas = 1;#}
+            graph3.useDataSetColors = false;
+            stockPanel3.addStockGraph(graph3);
+
+            var graph4 = new AmCharts.StockGraph();
+            graph4.valueField = "macdsignal";
+            graph4.type = "line";
+            graph4.color = "#b80000";
+            graph4.lineColor = "#b80000";
+            graph4.showBalloon = false;
+            graph4.useDataSetColors = false;
+            stockPanel3.addStockGraph(graph4);
+
+            var graph5 = new AmCharts.StockGraph();
+            graph5.valueField = "macdhist";
+            graph5.type = "column";
+            graph5.color = "#82c9f2";
+            graph5.lineColor = "#82c9f2";
+            graph5.fillColors = "#82c9f2";
+            graph5.fillAlphas = 0.3;
+            graph5.showBalloon = false;
+            graph5.useDataSetColors = false;
+            stockPanel3.addStockGraph(graph5);
+
+            var legend3 = new AmCharts.StockLegend();
+            legend3.markerType = "none";
+            legend3.markerSize = 0;
+            legend3.labelText = "";
+            legend3.periodValueTextComparing = "[[value.macd]]";
+            {#legend3.periodValueTextRegular = "[[value.macd]]";#}
+            stockPanel3.stockLegend = legend3;
+
+            var chartCursor3 = new AmCharts.ChartCursor();
+            chartCursor3.valueLineEnabled = true;
+            chartCursor3.valueLineAxis = valueAxis3;
+            stockPanel3.chartCursor = chartCursor3;
+
+            chart.panels.push(stockPanel3);
+            {% endif %}
+
+            {% if bot.is_rsi %}
+            // Panel4 RSI
+            var stockPanel4 = new AmCharts.StockPanel();
+            stockPanel4.title = "RSI";
+            stockPanel4.percentHeight = 30;
+            stockPanel4.marginTop = 1;
+            stockPanel4.showCategoryAxis = true;
+
+            var valueAxis4 = new AmCharts.ValueAxis();
+            valueAxis4.dashLength = 5;
+            valueAxis4.guides = [{
+                "fillAlpha": 0.1,
+                "fillColor": "#888888",
+                "lineAlpha": 0,
+                "toValue": {{ bot.rsi_less }},
+                "value": {{ bot.rsi_more }}
+            }];
+            stockPanel4.addValueAxis(valueAxis4);
+
+            stockPanel4.categoryAxis.dashLength = 5;
+
+            var graph4_1 = new AmCharts.StockGraph();
+            graph4_1.valueField = "rsi";
+            graph4_1.type = "line";
+            graph4_1.color = "#2bc9a1";
+            graph4_1.lineColor = "#2bc9a1";
+            {#graph4_1.showBalloon = false;#}
+            {#graph4_1.showBalloon = true;#}
+            {#graph4_1.balloonText = "rsi:<b>[[rsi]]";#}
+            graph4_1.useDataSetColors = false;
+            stockPanel4.addStockGraph(graph4_1);
+
+            var legend4 = new AmCharts.StockLegend();
+            legend4.markerType = "none";
+            legend4.markerSize = 0;
+            legend4.labelText = "";
+            legend4.periodValueTextRegular = "[[value.rsi]]";
+            stockPanel4.stockLegend = legend4;
+
+            var chartCursor4 = new AmCharts.ChartCursor();
+            chartCursor4.valueLineEnabled = true;
+            chartCursor4.valueLineAxis = valueAxis4;
+            stockPanel4.chartCursor = chartCursor4;
+            chart.panels.push(stockPanel4);
+            {% endif %}
+
+
+        {% if bot.is_adx %}
+            // Panel5 ADX
+            var stockPanel5 = new AmCharts.StockPanel();
+            stockPanel5.title = "ADX";
+            stockPanel5.percentHeight = 40;
+            stockPanel5.marginTop = 1;
+            stockPanel5.showCategoryAxis = true;
+
+            var valueAxis5 = new AmCharts.ValueAxis();
+            valueAxis5.dashLength = 5;
+            valueAxis5.guides = [{
+                "fillAlpha": 0.1,
+                "fillColor": "#888888",
+                "lineAlpha": 0,
+                "toValue": {{ bot.adx_less }},
+                "value": {{ bot.adx_more }}
+            }];
+            stockPanel5.addValueAxis(valueAxis5);
+
+            stockPanel5.categoryAxis.dashLength = 5;
+
+            var graph5_1 = new AmCharts.StockGraph();
+            graph5_1.valueField = "rsi";
+            graph5_1.type = "line";
+            graph5_1.color = "#691bc9";
+            graph5_1.lineColor = "#691bc9";
+            graph5_1.showBalloon = false;
+            graph5_1.useDataSetColors = false;
+            stockPanel5.addStockGraph(graph5_1);
+
+            var legend5 = new AmCharts.StockLegend();
+            legend5.markerType = "none";
+            legend5.markerSize = 0;
+            legend5.labelText = "";
+            legend5.periodValueTextRegular = "[[value.rsi]]";
+            stockPanel5.stockLegend = legend5;
+
+            var chartCursor5 = new AmCharts.ChartCursor();
+            chartCursor5.valueLineEnabled = true;
+            chartCursor5.valueLineAxis = valueAxis5;
+            stockPanel5.chartCursor = chartCursor5;
+            chart.panels.push(stockPanel5);
+            {% endif %}
+
+
+            /// panel Stochastic
+            var stockPanel6 = new AmCharts.StockPanel();
+            stockPanel6.title = "Stochastic chart";
+            stockPanel6.percentHeight = 60;
+            stockPanel6.marginTop = 1;
+            stockPanel6.showCategoryAxis = true;
+
+            var valueAxis6 = new AmCharts.ValueAxis();
+            valueAxis6.dashLength = 5;
+            valueAxis6.guides = [{
+                "fillAlpha": 0.1,
+                "fillColor": "#888888",
+                "lineAlpha": 0,
+                "toValue": {{ bot.stochastic_less }},
+                "value": {{ bot.stochastic_more }}
+            }];
+            stockPanel6.addValueAxis(valueAxis6);
+
+            stockPanel6.categoryAxis.dashLength = 5;
+
+            var graph6_1 = new AmCharts.StockGraph();
+            graph6_1.valueField = "slowk";
+            graph6_1.type = "line";
+            graph6_1.color = "#2ec90c";
+            graph6_1.lineColor = "#2ec90c";
+            {#graph6_1.#}
+            graph6_1.showBalloon = true;
+            {#graph6_1.fillAlphas = 1;#}
+            graph6_1.useDataSetColors = false;
+            stockPanel6.addStockGraph(graph6_1);
+
+            var graph6_2 = new AmCharts.StockGraph();
+            graph6_2.valueField = "slowd";
+            graph6_2.type = "line";
+            graph6_2.color = "#b80000";
+            graph6_2.lineColor = "#b80000";
+            graph6_2.showBalloon = false;
+            graph6_2.useDataSetColors = false;
+            stockPanel6.addStockGraph(graph6_2);
+
+            var legend6 = new AmCharts.StockLegend();
+            {#legend6.markerType = "none";#}
+            {#legend6.markerSize = 0;#}
+            {#legend6.labelText = "";#}
+            legend6.valueTextRegular = undefined;
+            legend6.periodValueTextComparing = "[[value.slowk]]";
+            {#legend6.periodValueTextRegular = "[[value.macd]]";#}
+            stockPanel6.stockLegend = legend6;
+
+            var chartCursor6 = new AmCharts.ChartCursor();
+            chartCursor6.valueLineEnabled = true;
+            chartCursor6.valueLineAxis = valueAxis;
+
+            chartCursor6.valueBalloonsEnabled = true;
+            chartCursor6.fullWidth = true;
+            chartCursor6.cursorAlpha = 0.1;
+            chartCursor6.valueLineBalloonEnabled = true;
+            chartCursor6.valueLineEnabled = true;
+            chartCursor6.valueLineAlpha = 0.5;
+
+            {#var chartCursor6 = new AmCharts.ChartCursor();#}
+            {#chartCursor6.valueLineEnabled = true;#}
+            {#chartCursor6.valueLineAxis = valueAxis6;#}
+            stockPanel6.chartCursor = chartCursor6;
+            chart.panels.push(stockPanel6);
+
+
+            // OTHER SETTINGS ////////////////////////////////////
+            var sbsettings = new AmCharts.ChartScrollbarSettings();
+            sbsettings.graph = graph;
+            sbsettings.graphType = "line";
+            sbsettings.usePeriod = "1mm";
+            sbsettings.updateOnReleaseOnly = false;
+            chart.chartScrollbarSettings = sbsettings;
+
+
+            // PERIOD SELECTOR ///////////////////////////////////
+            var periodSelector = new AmCharts.PeriodSelector();
+            periodSelector.position = "top";
+            periodSelector.dateFormat = "YYYY-MM-DD JJ:NN";
+            periodSelector.inputFieldWidth = 150;
+            periodSelector.periods = [{
+                period: "hh",
+                count: 1,
+                label: "1 hour"
+            }, {
+                period: "hh",
+                count: 2,
+                label: "2 hours"
+            }, {
+                period: "hh",
+                count: 5,
+                label: "5 hour"
+            }, {
+                period: "hh",
+                count: 12,
+                label: "12 hours"
+            }, {
+                period: "hh",
+                count: 15,
+                label: "15 hour"
+            }, {
+                period: "DD",
+                count: 1,
+                selected: true,
+                label: "1 day"
+            }, {
+                period: "DD",
+                count: 2,
+                label: "2 day"
+            },
+                {
+                period: "DD",
+                count: 7,
+                label: "1 week"
+            }, {
+                period: "MM",
+                count: 1,
+                label: "1 month"
+            }, {
+                period: "MAX",
+                label: "MAX"
+            }];
+            chart.periodSelector = periodSelector;
+
+            // EVENTS
+            var Events = [];
+
+            {% for order in orders %}
+                {% with d=order.created_at fd=order.filled_at %}
+                    Events.push({
+                        {% if fd and order.type == 'SELL' %}date: new Date('{{ fd|date:"Y" }}', '{{ fd|date:"m" }}', '{{ fd|date:"d" }}', '{{ fd|date:"H" }}', '{{ fd|date:"i" }}', '{{ fd|date:"s" }}'),
+                        {% elif d %}
+                            date: new Date('{{ d|date:"Y" }}', '{{ d|date:"m" }}', '{{ d|date:"d" }}', '{{ d|date:"H" }}', '{{ d|date:"i" }}', '{{ d|date:"s" }}'),
+                        {% endif %}
+                        {#showOnAxis: true,#}
+                        value: {{ order.price|to_point }},
+                        backgroundColor: '{{ order.get_color_marker }}',
+                        type: "pin",
+                        text: "{% if order.type == 'SELL' %}S{% else %}B{% endif %}",
+                        graph: graph,
+                        description: "{{ order.id }} ( {{ order.from_order.id|default:'' }}) {{ order.get_kind_display }} {{ order.type }}<br>{% if order.type == 'BUY' and order.kind == 'MAIN' %}*{{ d }}{% else %}{{ fd }}{% endif %}<br>price: {{ order.price|to_point }}{% for k, v in order.ticker_data.items %}<br>{{ k }}: {{ v }}{% endfor %}"
+                    });
+                {% endwith %}
+            {% endfor %}
+
+            {% for d in dojo_list %}
+                Events.push({
+                    {% if d %}date: new Date('{{ d|date:"Y" }}', '{{ d|date:"m" }}', '{{ d|date:"d" }}', '{{ d|date:"H" }}', '{{ d|date:"i" }}', '{{ d|date:"s" }}'),{% endif %}
+                    {#showOnAxis: true,#}
+                    value: 0,
+                    backgroundColor: '#CCCCCC',
+                    type: "pin",
+                    text: "D",
+                    {#graph: graph,#}
+                    graph: graph6_1,
+                    description: "Dojo"
+                });
+            {% endfor %}
+
+
+            {% for d in hummer_list %}
+                Events.push({
+                    {% if d %}date: new Date('{{ d|date:"Y" }}', '{{ d|date:"m" }}', '{{ d|date:"d" }}', '{{ d|date:"H" }}', '{{ d|date:"i" }}', '{{ d|date:"s" }}'),{% endif %}
+                    {#showOnAxis: true,#}
+                    value: 0,
+                    backgroundColor: '#a0a0a0',
+                    type: "pin",
+                    text: "H",
+                    {#graph: graph,#}
+                    graph: graph6_1,
+                    description: "Hummer"
+                });
+            {% endfor %}
+
+            {% for d in sword_list %}
+                Events.push({
+                    {% if d %}date: new Date('{{ d|date:"Y" }}', '{{ d|date:"m" }}', '{{ d|date:"d" }}', '{{ d|date:"H" }}', '{{ d|date:"i" }}', '{{ d|date:"s" }}'),{% endif %}
+                    {#showOnAxis: true,#}
+                    value: 0,
+                    backgroundColor: '#777777',
+                    type: "pin",
+                    text: "S",
+                    {#graph: graph,#}
+                    graph: graph6_1,
+                    description: "Sword"
+                });
+            {% endfor %}
+
+            dataSet.stockEvents = Events;
+
+            chart.write('chartdiv');
+        }
+
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            {{ bot }} {{ market }} [{{ tick_interval }}]
+            {#            <canvas id="barChart" class="full-width"></canvas>#}
+
+            {#            <div id="chart_div" style="height: 500px;"></div>#}
+            <div id="chartdiv" style="width:100%; height:700px;"></div>
+        </div>
+        <div class="col-md-3">
+
+{#            <form action="" method="POST">#}
+{#                {{ macd_filter.fastperiod }}#}
+{#                {{ macd_filter.slowperiod }}#}
+{#                {{ macd_filter.signalperiod }}#}
+{#            </form>#}
+{#            {{ charts_data }}#}
+            {#            'data_macd': {{ data_macd }}#}
+            {#            <hr>#}
+            {#            'check_macd': {{ check_macd }}#}
+            {#            dates {{ dates }}#}
+            {#            <hr>#}
+            {#            data_macd {{ data_macd }}#}
+            {#            <hr>#}
+            {#            'macd': {{ macd }}#}
+            {#            <hr>#}
+            {#            'macdsignal': {{ macdsignal }}#}
+            {#            <hr>#}
+            {#            'macdhist': {{ macdhist }}#}
+        </div>
+    </div>
+{% endblock %}

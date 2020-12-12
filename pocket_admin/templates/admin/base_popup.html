@@ -1,0 +1,165 @@
+{% load i18n admin_static bootstrapped_goodies_tags %}
+<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<!-- Template Name: Packet - Responsive Admin Template build with Twitter Bootstrap 3.x | Author: ClipTheme -->
+<!--[if IE 8]><html class="ie8" lang="{{ LANGUAGE_CODE|default:"en-us" }}"><![endif]-->
+<!--[if IE 9]><html class="ie9" lang="{{ LANGUAGE_CODE|default:"en-us" }}"><![endif]-->
+<!--[if !IE]><!-->
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<!--<![endif]-->
+<!-- start: HEAD -->
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <!-- start: META -->
+    <!--[if IE]><meta http-equiv='X-UA-Compatible' content="IE=edge,IE=9,IE=8,chrome=1" /><![endif]-->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta content="" name="description" />
+    <meta content="" name="author" />
+    <!-- end: META -->
+    <!-- start: GOOGLE FONTS -->
+    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
+    <!-- end: GOOGLE FONTS -->
+    {% block extrastyle %}{% endblock %}
+
+    {#        <link rel="stylesheet" type="text/css" href="{% static "admin/css/overrides.css" %}" />#}
+    {% if LANGUAGE_BIDI %}
+        {#            <link href="{% static "bootstrap-rtl/css/bootstrap-rtl.min.css" %}" rel="stylesheet"/>#}
+        {#            <link href="{% static "bootstrap-rtl/css/bootstrap-flipped.min.css" %}" rel="stylesheet"/>#}
+    {% endif %}
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
+    <!-- start: MAIN CSS -->
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/bootstrap/dist/css/bootstrap.min.css" %}">
+
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/font-awesome/css/font-awesome.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/themify-icons/themify-icons.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/flag-icon-css/css/flag-icon.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/animate.css/animate.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/perfect-scrollbar/css/perfect-scrollbar.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/switchery/dist/switchery.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/seiyria-bootstrap-slider/dist/css/bootstrap-slider.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/ladda/dist/ladda-themeless.min.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/slick.js/slick/slick.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/slick.js/slick/slick-theme.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/select2/dist/css/select2.min.css" %}" media="screen">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.min.css" %}" media="screen">
+    <link href="https://cdn.jsdelivr.net/jquery.suggestions/16.2.2/css/suggestions.css" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/sweetalert/dist/sweetalert.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/bower_components/toastr/toastr.min.css" %}">
+    <!-- end: MAIN CSS -->
+    <!-- start: CSS REQUIRED FOR THIS PAGE ONLY -->
+    <!-- end: CSS REQUIRED FOR THIS PAGE ONLY -->
+    <!-- start: Packet CSS -->
+    <link rel="stylesheet" href="{% static "admin/packet/assets/css/styles.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/assets/css/plugins.css" %}">
+    <link rel="stylesheet" href="{% static "admin/packet/assets/css/themes/lyt1-theme-1.css" %}" id="skin_color">
+    <link rel="stylesheet" href="{% static "admin/packet/custom_style.css" %}?v=0.3" >
+    <!-- end: Packet CSS -->
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static "admin/packet/favicon.ico" %}" />
+
+
+    <script type="text/javascript">
+        //<![CDATA[
+        {#            window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";#}
+        {#            window.__admin_utc_offset__ = "{% filter escapejs %}{% now "Z" %}{% endfilter %}";#}
+        //]]>
+    </script>
+
+    <!-- start: MAIN JAVASCRIPTS -->
+    <script src="{% static "admin/packet/bower_components/jquery/dist/jquery.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/jquery/dist/jquery.cookie.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/bootstrap/dist/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/components-modernizr/modernizr.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/js-cookie/src/js.cookie.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/perfect-scrollbar/js/perfect-scrollbar.jquery.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/jquery-fullscreen/jquery.fullscreen-min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/switchery/dist/switchery.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/jquery.knobe/dist/jquery.knob.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/slick.js/slick/slick.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/jquery-numerator/jquery-numerator.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/ladda/dist/spin.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/ladda/dist/ladda.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/ladda/dist/ladda.jquery.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/select2/dist/js/select2.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ru.min.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/bootstrap-timepicker/js/bootstrap-timepicker.js" %}"></script>
+    <script src="{% static "admin/packet/bower_components/fileupload/js/vendor/jquery.ui.widget.js" %}"></script>
+    <!-- end: MAIN JAVASCRIPTS -->
+    <!-- start: JAVASCRIPTS REQUIRED FOR THIS PAGE ONLY -->
+    {% block extrahead %}{% endblock %}
+    <!-- end: JAVASCRIPTS REQUIRED FOR THIS PAGE ONLY -->
+
+    {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+</head>
+<!-- end: HEAD -->
+<body class="login">
+{% if not request.user.is_superuser and not  request.user.is_superadmin and not IS_LOCAL %}
+    {% include 'metrika.html' %}
+{% endif %}
+{#<header class="navbar navbar-default navbar-static-top">#}
+{#    <!-- start: NAVBAR HEADER -->#}
+{#    <div class="navbar-header">#}
+{#        <a class="navbar-brand" href="/"> <img src="/static/img/logo-listrada.png" alt="Packet"> </a>#}
+{#    </div>#}
+{##}
+{#    <div class="navbar-collapse collapse">#}
+{#    </div>#}
+{##}
+{#</header>#}
+
+<div class="row">
+
+    <div class="col-md-12">
+        {% block messages %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-message alert-message-hide alert alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        {{ message|capfirst }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endblock messages %}
+        {% block content %}
+
+        {% endblock %}
+    </div>
+
+</div>
+
+<!-- start: JAVASCRIPTS REQUIRED FOR THIS PAGE ONLY -->
+<script src="{% static "admin/packet/bower_components/ckeditor/ckeditor.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/ckeditor/adapters/jquery.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/bb-jquery-validation/dist/jquery.validate.js" %}"></script>
+<!-- end: JAVASCRIPTS REQUIRED FOR THIS PAGE ONLY -->
+<!-- start: Packet JAVASCRIPTS -->
+<script src="{% static "admin/packet/assets/js/letter-icons.js" %}"></script>
+
+<link href="{% static "admin/packet/bower_components/spectrum/spectrum.css" %}" rel="stylesheet" media="screen">
+<script src="{% static "admin/packet/bower_components/spectrum/spectrum.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/sweetalert/dist/sweetalert.min.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/toastr/toastr.min.js" %}"></script>
+<script src="{% static "admin/packet/bower_components/jquery.maskedinput/dist/jquery.maskedinput.min.js" %}"></script>
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.suggestions/16.2.2/js/jquery.suggestions.min.js"></script>
+<script src="{% static "admin/packet/assets/js/main.js" %}"></script>
+<!-- end: Packet JAVASCRIPTS -->
+<!-- start: JavaScript Event Handlers for this page -->
+
+<script>
+    jQuery(document).ready(function() {
+        Main.init();
+    });
+</script>
+<!-- end: JavaScript Event Handlers for this page -->
+{% block extrascript %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,82 @@
+{% load i18n admin_static admin_modify %}
+<div class="inline-group {{ inline_admin_formset.opts.suit_classes }}"
+     id="{{ inline_admin_formset.formset.prefix }}-group">
+    <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
+        {% if object_id %}
+            <div style="margin-bottom: 10px;"><a id="bind_category_features" href="#" data-url="{{ request.path }}">Наполнить товар свойствами</a></div>
+        {% endif %}
+        <div id="feature_table">
+            {% include 'admin/custom/ajax_feature_tabular_block.html' %}
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function feature_change(feature){
+        var feature_id = $(feature).attr('id');
+        var row_id = feature_id.match(/\d+/)[0];
+        var _id = feature_id.replace(/-\w+$/, '-id');
+        var url = '{{ request.path }}';
+        $.ajax({
+            url: url,
+            type: "GET",
+            data: {
+                pk_value: $('#' + _id).val(),
+                pk_key: _id,
+                feature_id: $(feature).val(),
+                row_id: row_id
+            },
+            success: function (data) {
+                var $row = $(data).find('.form-row:first');
+                var $select2_elem = $row.find('[data-select2-id]');
+                var selector = $select2_elem.attr('id'),
+                    fieldID = $select2_elem.data('select2-id');
+                $(feature).parents('.form-row').html($row.html());
+                window['django_select2'][selector.replace(/-\d+-/, '_')](selector, fieldID);
+            },
+            error: function () { }
+        });
+    }
+    function feature_value_change(feature_value) {
+        console.log(feature_value);
+        var value_id = $(feature_value).attr('id');
+        var url = '{{ request.path }}';
+        if ( !$.isNumeric($(feature_value).val()) ) {
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    new_value: $(feature_value).val()
+                },
+                success: function (value) {
+                    var txt = $(feature_value).val().replace(/\w*:/, '');
+                    $(feature_value).val(value);
+                    $(feature_value).attr('txt', txt);
+                    var select2_id = $(feature_value).data('select2-id');
+                    var selector = value_id.replace(/-\d+-/, '_');
+                    window['django_select2'][selector](value_id, select2_id);
+                },
+                error: function () {
+                }
+            });
+        }
+
+    }
+    (function ($) {
+        $('#bind_category_features').click(function (e) {
+            e.preventDefault();
+            var url = $(this).data('url');
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {bind_features: '1'},
+                success: function (data) {
+                    $('#feature_table').html(data);
+                    $('#bind_category_features').replaceWith('<span>Готово!</span>');
+                },
+                error: function () {
+                }
+            });
+        })
+    })(django.jQuery);
+</script>

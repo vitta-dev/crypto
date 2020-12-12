@@ -1,0 +1,84 @@
+<html>
+<head>
+  <title>Кадрирование изображения</title>
+  <link href="/static/admin_widgets/jcrop/jquery.Jcrop.css" rel="stylesheet" type="text/css" />
+  {#  Не менять jquery! Требуется точная версия!  #}
+  <script type="text/javascript" src="/static/admin_widgets/jcrop/jquery.js"></script>
+  <script type="text/javascript" src="/static/admin_widgets/jcrop/jquery.Jcrop.min.js"></script>
+  <script type="text/javascript">
+
+  jQuery(function($){
+
+    // Create variables (in this scope) to hold the API and image size
+    var jcrop_api, boundx, boundy;
+    var ratio = {{ output_size.0 }}/{{ output_size.1 }};
+    $('#target').Jcrop({
+      onChange:   showCoords,
+      onSelect:   showCoords,
+      onRelease:  clearCoords,
+      aspectRatio: ratio
+    },function(){
+      // Use the API to get the real image size
+      var bounds = this.getBounds();
+      boundx = bounds[0];
+      boundy = bounds[1];
+      // Store the API in the jcrop_api variable
+      jcrop_api = this;
+    });
+
+    function showCoords(c)
+    {
+      $('#x1').val(parseInt(c.x));
+      $('#y1').val(parseInt(c.y));
+      $('#x2').val(parseInt(c.x2));
+      $('#y2').val(parseInt(c.y2));
+      $('#w').val(parseInt(c.w));
+      $('#h').val(parseInt(c.h));
+      if (parseInt(c.w) > 0)
+    {
+      var rx = {{ output_size.0 }} / c.w;
+      var ry = {{ output_size.1 }} / c.h;
+
+/*      $('#preview').css({
+      width: Math.round(rx * boundx) + 'px',
+      height: Math.round(ry * boundy) + 'px',
+      marginLeft: '-' + Math.round(rx * c.x) + 'px',
+      marginTop: '-' + Math.round(ry * c.y) + 'px'
+      });*/
+    }
+    };
+
+    function clearCoords()
+    {
+      $('#coords input').val('');
+      $('#coords .button').val('Применить');
+      $('#h').css({color:'red'});
+      window.setTimeout(function(){
+        $('#h').css({color:'inherit'});
+      },500);
+    };
+  });
+</script>
+</head>
+<body>
+<div id="outer">
+  <h1>Кадрирование изображения</h1>
+  <p>Выделите желаемую область для создания превью изображения.</p>
+  <div class="original">
+    <img src="{{ image.url }}" id="target" alt="" />
+  </div>
+  <form id="coords" class="coords" method="post" action="">{% csrf_token %}
+    <div style="display: none;">
+      <label>X1 <input type="text" size="4" id="x1" name="x1" /></label>
+      <label>Y1 <input type="text" size="4" id="y1" name="y1" /></label>
+      <label>X2 <input type="text" size="4" id="x2" name="x2" /></label>
+      <label>Y2 <input type="text" size="4" id="y2" name="y2" /></label>
+      <label>Ширина <input type="text" size="4" id="w" name="w" /></label>
+      <label>Высота <input type="text" size="4" id="h" name="h" /></label>
+
+    </div>
+    <input type="submit" class="button" value="Применить" />
+  </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,163 @@
+.not-active-link {pointer-events: none; cursor: default; color: #666 !important; }
+.alert-error {color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
+.form-full input[type="text"], .form-full input[type="password"], .form-full input[type="datetime"],
+.form-full input[type="daterange"], .form-full input[type="datetime-local"], .form-full input[type="date"],
+.form-full input[type="month"], .form-full input[type="time"], .form-full input[type="week"],
+.form-full input[type="number"], .form-full input[type="email"], .form-full input[type="url"],
+.form-full input[type="search"], .form-full input[type="tel"], .form-full input[type="color"]{
+    display: block;
+    width: 100%;
+    height: 34px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    border: 1px solid #c8c7cc;
+    border-radius: 0;
+    color: #5b5b60 !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    padding: 5px 4px !important;
+    box-shadow: none !important;
+}
+.form-full .vLargeTextField {width: 100%;}
+#content {padding: 15px;}
+#uploadModal {z-index: 15000 !important;}
+.navbar .navbar-right > li > span.project-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 60px;
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
+    opacity: 0.9;
+    padding: 0 15px;
+    position: relative;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+}
+.form-full input.vForeignKeyRawIdAdminField {width: 250px; }
+
+label.required {font-weight: normal; color: #858585;}
+label.required:after{
+    content: " * ";
+    display: inline;
+    color: #E6674A;
+}
+
+
+#result_list {margin-top: 10px;}
+.change-list .filtered .results,
+.change-list .filtered .paginator, .filtered #toolbar, .filtered div.xfull {margin-right: 0;}
+.selector-available h2, .selector-chosen h2 {font-size: 20px; padding: 5px 0; margin-bottom: 0;}
+
+.related-widget-wrapper{display: block; width: 100%;}
+fieldset .field-box{float: left; margin-right: 20px !important;}
+fieldset .field-box label{margin-bottom: 5px; display: block;}
+
+/*  Список заказаов */
+.order-list th {font-weight: normal;}
+table.order-list > tbody > tr > td {color: #333 !important;}
+.link-cell {display: block; width: 100%; height: 100%;}
+.btn-link {color: #58748B;}
+/* CUSTOM FORM FIELDS */
+
+.vSelectMultipleField {
+    vertical-align: top;
+}
+
+.vCheckboxField {
+    border: none;
+}
+
+.vDateField, .vTimeField {
+    margin-right: 2px;
+    margin-bottom: 4px;
+}
+
+.vDateField {
+    min-width: 6.85em;
+}
+
+.vTimeField {
+    min-width: 4.7em;
+}
+
+.vURLField {
+    width: 30em;
+}
+
+.vLargeTextField, .vXMLLargeTextField {
+    width: 48em;
+}
+
+.flatpages-flatpage #id_content {
+    height: 40.2em;
+}
+
+.module table .vPositiveSmallIntegerField {
+    width: 2.2em;
+}
+
+.vTextField {
+    width: 20em;
+}
+
+.vIntegerField {
+    width: 5em;
+}
+
+.vBigIntegerField {
+    width: 10em;
+}
+
+.vForeignKeyRawIdAdminField {
+    width: 5em;
+}
+
+.block-order-file {font-size: 30px;}
+
+.fc-event .fc-content > span:first-child:before, .event-category:before {
+    content: None;
+}
+.ecolor, .fc-title {color: #333;}
+/*input[name="form_search-responsible"] {margin-left: 15px;}*/
+.color-marker:before {
+    content: "\f111";
+    font-family: FontAwesome;
+    font-size: 12px;
+    line-height: 16px;
+    margin-right: 5px;
+    color: #333;
+    /*left: 15px;*/
+    /*float: left;*/
+}
+
+.copy-address {cursor: pointer;}
+.filter-search ul {margin-left: 0; padding-left: 0;}
+.filter-search ul li {list-style: none;}
+
+.select2-container { display: block; width: 100% !important;}
+
+/* calendar */
+.fc-center h2, .fc-day-header {font-family: Helvetica,​ Arial, ​sans-serif; font-weight: 200;}
+
+.notify .btn {margin-bottom: 5px;}
+.notify-client .btn {margin-right: 3px;}
+
+#contact-form {margin-right: 30px;}
+
+@media (max-width: 1428px) {
+    .label-xs-double {height: 36px;}
+}
+
+@media only screen and (device-width: 768px) {
+    /* For general iPad layouts */
+    .select2-container {
+        width: 100% !important;
+    }
+}
+

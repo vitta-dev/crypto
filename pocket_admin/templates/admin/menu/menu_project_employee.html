@@ -1,0 +1,105 @@
+<nav>
+    <!-- start: MAIN NAVIGATION MENU -->
+    <div class="navbar-title">
+        <span>Main Navigation</span>
+    </div>
+    <ul class="main-navigation-menu">
+{#        <li >#}
+{#            <a href="#">#}
+{#                <div class="item-content">#}
+{#                    <div class="item-media">#}
+{#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-home"></i></span></div>#}
+                        {#											<div class="lettericon" data-text="Панель управления" data-size="sm" data-char-count="2"></div>#}
+{#                    </div>#}
+{#                    <div class="item-inner">#}
+{#                        <span class="title"> Панель управления </span>#}
+{#                    </div>#}
+{#                </div> </a>#}
+{#        </li>#}
+        <li {% if 'new-order' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'new-order' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-cart-plus"></i></span></div>
+                        {#											<div class="lettericon" data-text="Принять заказ" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Принять заказ </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li {% if 'list-order' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'list-order' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-cubes"></i></span></div>
+                        {#											<div class="lettericon" data-text="Принять заказ" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Заказы </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li {% if 'calendar' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'calendar' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-calendar"></i></span></div>
+                        {#											<div class="lettericon" data-text="Календарь" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Календарь </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li {% if 'map' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'map' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-map-marker"></i></span></div>
+                        {#											<div class="lettericon" data-text="Карта" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Карта </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li {% if '/client/' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'admin_project:crm_client_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-user"></i></span></div>
+                        {#											<div class="lettericon" data-text="Календарь" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Клиенты </span>
+                    </div>
+                </div> </a>
+        </li>
+
+    </ul>
+    <!-- end: MAIN NAVIGATION MENU -->
+    <!-- start: CORE FEATURES -->
+    <div class="navbar-title">
+        <span>Core Features</span>
+    </div>
+    <ul class="folders">
+        <li>
+            <a href="#">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-question"></i></span></div>
+                        {#											<div class="lettericon" data-text="Помощь" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Помощь </span>
+                    </div>
+                </div> </a>
+        </li>
+    </ul>
+    <!-- end: CORE FEATURES -->
+</nav>

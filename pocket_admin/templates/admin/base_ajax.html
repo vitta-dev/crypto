@@ -1,0 +1,21 @@
+{% block extrastyle %}{% endblock %}
+
+{% block extrahead %}{% endblock %}
+
+{% block messages %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert-message alert-message-hide alert alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                {{ message|capfirst }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock messages %}
+{% block content %}
+
+{% endblock %}
+
+{% block extrascript %}{% endblock %}

@@ -1,0 +1,336 @@
+{% extends base_tpl %}
+{% load i18n admin_static bootstrapped_goodies_tags humanize utils_charts %}
+{% block title %}Ордера{% endblock %}
+{% block extrascript %}
+    <style>
+        .progress-decrease {padding-left: 0; padding-right: 0;}
+    </style>
+    <script>
+        $('.list-group a').click(function(e){
+            e.stopPropagation();
+        })
+    </script>
+{% endblock %}
+{% block main_content %}
+    <h1>Ордера</h1>
+    <form action="" method="get">
+        <div class="container-fluid container-fullw">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-white">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <fieldset>
+                                        <legend>
+                                            Фильтр
+                                        </legend>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="input-group input-daterange datepicker">
+                                                    {{ orders_filter.date_from }}
+                                                    <span class="input-group-addon bg-primary">to</span>
+                                                    {{ orders_filter.date_to }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label> {{ orders_filter.bot.label }} </label>
+                                                    {{ orders_filter.bot }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label> {{ orders_filter.search.label }} </label>
+                                                    {{ orders_filter.search }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit">Отправить</button>
+
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </form>
+    <table class="table no-margin table-hover">
+        <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>
+                <div class="col-xs-12 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">Покупка</small>
+                    </div>
+                </div>
+                <div class="col-xs-6 no-padding text-center">
+                    <div class="border-right border-dark padding-5">
+                        <small class="text-muted">Цена</small>
+                    </div>
+                </div>
+                <div class="col-xs-6 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">Монет</small>
+                    </div>
+                </div>
+                <div class="col-xs-12 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">Потрачено</small>
+                    </div>
+                </div>
+            </th>
+            <th class="center">
+                <div class="col-xs-12 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">Страховочные</small>
+                    </div>
+                </div>
+                <div class="col-xs-6 no-padding text-center">
+                    <div class="border-right border-dark padding-5">
+                        <small class="text-muted">Исполнено</small>
+                    </div>
+                </div>
+                <div class="col-xs-6 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">Открытых</small>
+                    </div>
+                </div>
+            </th>
+            <th class="center">
+                <div class="col-xs-12 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">Средняя</small>
+                    </div>
+                </div>
+                <div class="col-xs-6 no-padding text-center">
+                    <div class="border-right border-dark padding-5">
+                        <small class="text-muted">цена</small>
+                    </div>
+                </div>
+                <div class="col-xs-6 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">кол-во</small>
+                    </div>
+                </div>
+            </th>
+            <th>
+                <div class="col-xs-12 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">Продажа</small>
+                    </div>
+                </div>
+            </th>
+            <th>
+                <div class="col-xs-12 no-padding text-center">
+                    <div class="padding-5">
+                        <small class="text-muted">Профит</small>
+                    </div>
+                </div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+            <tr>
+                <td class="hidden-xs">
+                    <div class="block">
+                        <a href="{% url 'chart-market-bot' order.market.name order.bot.name %}" class="block text-large"> {{ order.market }} </a>
+                        {{ order.bot }}<br>
+                    </div>
+                </td>
+                <td>
+                <td>
+                    <div class="block">
+                        [ {{ order.id }} ]<br><br>
+                        {% if order.status == 'CLOSED' %}
+                            <span class="label label-success">Закрыт</span>
+                        {% elif order.status == 'CANCELED' %}
+                            <span class="label partition-dark-grey">Отменен</span><br>
+                            <small class="text-muted">{{ order.cancelled_at|date:'d-m-Y H:i' }}</small>
+                        {% elif order.status == 'FILLED' %}
+                            <span class="label partition-green">Исполнен</span><br>
+                            <small class="text-muted">{{ order.filled_at|date:'d-m-Y H:i' }}</small>
+                        {% elif order.status == 'PART_FILLED' %}
+                            <span class="label partition-blue">Частично исполнен</span>
+                        {% elif order.status == 'OPEN' %}
+                            <span class="label label-info">Открыт</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="">
+                        <div class="col-xs-6 no-padding text-center">
+                            <div class="border-right border-dark padding-5">
+                                <span class="">{{ order.price }}</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 no-padding text-center">
+                            <div class="padding-5">
+                                <span class="">{{ order.amount }}</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding text-center">
+                            <div class="padding-5">
+                                <span class="">{{ order.spent }}</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding text-center">
+                            <div class="padding-5">
+                                <span class="">{{ order.created_at }}</span>
+                            </div>
+                        </div>
+
+                        {#                    <div class="block">#}
+                        {#                        <strong>Multi-slot transclusion</strong><span class="text-muted"> has been approved</span>#}
+                        {#                    </div>#}
+                        {#                    <span class="text-small text-muted">An endorsement for </span><span class="text-azure">AngularJs</span>#}
+
+
+                    </div>
+                </td>
+                <td>
+                    {% if order.status != 'CANCELED' %}
+                        {% with so=order.get_safety_orders_info %}
+                            <div class="col-xs-6 no-padding text-center">
+                                <div class="border-right border-dark padding-5">
+                                <span class="">
+                                    {{ so.filled.count }} ( {{ so.filled.amount }} )</span>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 no-padding text-center">
+                                <div class="padding-5">
+                                <span class="">
+                                    {{ so.opened.count }} ( {{ so.opened.amount }} )</span>
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.status != 'CANCELED' %}
+                        <div class="col-xs-6 no-padding text-center">
+                            <div class="border-right border-dark padding-5">
+                                <span class="">{{ order.get_average_price|floatformat:8 }}</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 no-padding text-center">
+                            <div class="padding-5">
+                                <span class="">{{ order.get_amount_for_sell|floatformat:8 }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </td>
+                <td class="visible-lg">
+                    {% if order.status == 'FILLED' %}
+                        {% with wait_price=order.get_sell_price current_price=order.get_current_price %}
+                            <div class="col-xs-6 no-padding text-center">
+                                <div class="padding-5">
+                                    <small class="">CurrentPrice
+                                        <br>
+                                        <strong>{{ current_price|floatformat:8  }}</strong></small>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 no-padding text-center">
+                                <div class="border-right border-dark padding-5">
+                                    <small class="">WaitPrice
+                                        <br>
+                                        <strong>{{ wait_price.price|floatformat:8  }}</strong></small>
+                                </div>
+                            </div>
+                            {#                            {% diff_percent wait_price.price current_price True as percent %}#}
+                            {% progress_price order.get_average_price wait_price.price current_price as percent %}
+                            <div class="col-xs-12">
+                                {% if percent.is_increase %}
+                                    <span class="block padding-top-10">
+                                        <div class="progress progress-xs no-radius background-dark no-margin">
+                                            <div class="progress-bar progress-bar-purple"
+                                                 role="progressbar"
+                                                 aria-valuenow="{{ percent.value }}" aria-valuemin="0" aria-valuemax="100"
+                                                 style="width: {{ percent.value }}%;">
+                                                <span class="sr-only"> {{ percent.value }}% </span>
+                                            </div>
+                                        </div>
+                                    </span>
+                                {% else %}
+                                    <div class="col-xs-6 progress-decrease">
+                                        <span class="block padding-top-10">
+                                            <div class="progress progress-xs no-radius background-dark no-margin">
+                                                <div class="progress-bar progress-bar-danger pull-right"
+                                                     role="progressbar"
+                                                     aria-valuenow="{{ percent.value }}" aria-valuemin="0" aria-valuemax="100"
+                                                     style="width: {{ percent.value }}%;">
+                                                    <span class="sr-only"> {{ percent.value }}% </span>
+                                                </div>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    <div class="col-xs-6 progress-decrease">
+                                        <span class="block padding-top-10">
+                                            <div class="progress progress-xs no-radius background-dark no-margin">
+                                                <div class="progress-bar progress-bar-purple"
+                                                     role="progressbar"
+                                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                                                     style="width: 0;">
+                                                    <span class="sr-only"> 0% </span>
+                                                </div>
+                                            </div>
+                                        </span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endwith %}
+                    {% elif order.status == 'CLOSED' %}
+                        {% for o in order.get_sell_orders %}
+                            <div class="col-xs-6 no-padding text-center">
+                                <div class="border-right border-dark padding-5">
+                                    <small class="text-muted">Price
+                                        <br>
+                                        <strong>{{ o.price }}</strong></small>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 no-padding text-center">
+                                <div class="border-right border-dark padding-5">
+                                    <small class="text-muted">Amount
+                                        <br>
+                                        <strong>{{ o.amount }}</strong></small>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding text-center">
+                                <div class="padding-5">
+                                    <small class="text-muted">
+                                        <strong>{{ o.spent }}</strong></small>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding text-center">
+                                <div class="padding-5">
+                                    <small class="text-muted">
+                                        <strong>{{ o.filled_at }}</strong></small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.status == 'CLOSED' %}
+                        {% with profit=order.get_profit %}
+                            <span class="{% if profit > 0 %}text-success{% elif profit < 0 %}text-danger{% endif %}">
+                            {{ profit|floatformat:8 }}<br>
+                            {{ order.get_profit_percent|floatformat:2 }}%
+                        </span>
+                        {% endwith %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+{% endblock %}

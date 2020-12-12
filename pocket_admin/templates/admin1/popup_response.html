@@ -1,0 +1,10 @@
+{# Шаблон адаптирован для fancybox.iframe #}
+
+<script type="text/javascript">
+    if (window.parent.length > 0) {
+        window.parent.location.reload()
+    }
+    else {
+        opener.dismissAddAnotherPopup(window, "{{ pk_value }}", "{{ obj }}");
+    }
+</script>

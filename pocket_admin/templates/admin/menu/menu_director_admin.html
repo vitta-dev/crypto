@@ -1,0 +1,196 @@
+<nav>
+    <!-- start: MAIN NAVIGATION MENU -->
+    <div class="navbar-title">
+        <span></span>
+    </div>
+    <ul class="main-navigation-menu">
+
+        <li {% if '/catalog/catalog/' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'director_admin:catalog_catalog_changelist' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-database"></i></span></div>
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Каталоги </span>
+                    </div>
+                </div> </a>
+        </li>
+
+        <li {% if '/contractor/list' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="{% url 'contractor-list' %}">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-user-secret"></i></span></div>
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Контрагенты </span>
+                    </div>
+                </div> </a>
+        </li>
+
+
+
+
+
+        {#        <li >#}
+        {#            <a href="#">#}
+        {#                <div class="item-content">#}
+        {#                    <div class="item-media">#}
+        {#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-home"></i></span></div>#}
+        {#											<div class="lettericon" data-text="Панель управления" data-size="sm" data-char-count="2"></div>#}
+        {#                    </div>#}
+        {#                    <div class="item-inner">#}
+        {#                        <span class="title"> Панель управления </span>#}
+        {#                    </div>#}
+        {#                </div> </a>#}
+        {#        </li>#}
+{#        <li {% if 'new-order' in request.META.PATH_INFO %}class="active"{% endif %}>#}
+{#            <a href="{% url 'new-order' %}">#}
+{#                <div class="item-content">#}
+{#                    <div class="item-media">#}
+{#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-cart-plus"></i></span></div>#}
+{#                    </div>#}
+{#                    <div class="item-inner">#}
+{#                        <span class="title"> Принять заказ </span>#}
+{#                    </div>#}
+{#                </div> </a>#}
+{#        </li>#}
+{##}
+{#        <li {% if 'list-order' in request.META.PATH_INFO %}class="active"{% endif %}>#}
+{#            <a href="{% url 'list-order' %}">#}
+{#                <div class="item-content">#}
+{#                    <div class="item-media">#}
+{#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-cubes"></i></span></div>#}
+{#                    </div>#}
+{#                    <div class="item-inner">#}
+{#                        <span class="title"> Заказы </span>#}
+{#                    </div>#}
+{#                </div> </a>#}
+{#        </li>#}
+{##}
+{#        <li {% if 'calendar' in request.META.PATH_INFO %}class="active"{% endif %}>#}
+{#            <a href="{% url 'calendar' %}">#}
+{#                <div class="item-content">#}
+{#                    <div class="item-media">#}
+{#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-calendar"></i></span></div>#}
+{#                    </div>#}
+{#                    <div class="item-inner">#}
+{#                        <span class="title"> Календарь </span>#}
+{#                    </div>#}
+{#                </div> </a>#}
+{#        </li>#}
+{##}
+{#        <li {% if 'map' in request.META.PATH_INFO %}class="active"{% endif %}>#}
+{#            <a href="{% url 'map' %}">#}
+{#                <div class="item-content">#}
+{#                    <div class="item-media">#}
+{#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-map-marker"></i></span></div>#}
+{#                    </div>#}
+{#                    <div class="item-inner">#}
+{#                        <span class="title"> Карта </span>#}
+{#                    </div>#}
+{#                </div> </a>#}
+{#        </li>#}
+{##}
+{#        <li {% if '/client/' in request.META.PATH_INFO %}class="active"{% endif %}>#}
+{#            <a href="{% url 'admin_project:crm_client_changelist' %}">#}
+{#                <div class="item-content">#}
+{#                    <div class="item-media">#}
+{#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-user"></i></span></div>#}
+{#                    </div>#}
+{#                    <div class="item-inner">#}
+{#                        <span class="title"> Клиенты </span>#}
+{#                    </div>#}
+{#                </div> </a>#}
+{#        </li>#}
+
+{#        <li {% if 'projectorderfiles' in request.META.PATH_INFO %}class="active"{% endif %}>#}
+{#            <a href="{% url 'admin_project:crm_projectorderfiles_changelist' %}">#}
+{#                <div class="item-content">#}
+{#                    <div class="item-media">#}
+{#                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-files-o"></i></span></div>#}
+{#                    </div>#}
+{#                    <div class="item-inner">#}
+{#                        <span class="title"> Файлы </span>#}
+{#                    </div>#}
+{#                </div> </a>#}
+{#        </li>#}
+
+
+
+    </ul>
+    <!-- end: MAIN NAVIGATION MENU -->
+    <!-- start: CORE FEATURES -->
+    <div class="navbar-title">
+        <span>Настройки</span>
+    </div>
+    <ul class="folders1">
+
+
+    <li {% if 'catalogtypeproduct' in request.META.PATH_INFO or 'catalogtypeattributes' in request.META.PATH_INFO or 'catalogoption' in request.META.PATH_INFO or 'catalogadditionoffer' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="javascript:void(0)">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-briefcase"></i></span></div>
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Настройки каталогов</span><i class="icon-arrow"></i>
+                    </div>
+                </div> </a>
+            <ul class="sub-menu">
+                <li {% if 'catalogtypeproduct' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'director_admin:catalog_catalogtypeproduct_changelist' %}"> <span class="title"> Типы товаров </span> </a>
+                </li>
+{#                <li {% if 'catalogtypeattributes' in request.META.PATH_INFO %}class="active"{% endif %}>#}
+{#                    <a href="{% url 'director_admin:catalog_catalogtypeattributes_changelist' %}"> <span class="title"> Атрибуты товаров </span> </a>#}
+{#                </li>#}
+{#                <li {% if 'catalogoption' in request.META.PATH_INFO %}class="active"{% endif %}>#}
+{#                    <a href="{% url 'director_admin:catalog_catalogoption_changelist' %}"> <span class="title"> Характеристики товаров </span> </a>#}
+{#                </li>#}
+                <li {% if 'catalogadditionoffer' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'director_admin:catalog_catalogadditionoffer_changelist' %}"> <span class="title"> Дополнительные предложения </span> </a>
+                </li>
+            </ul>
+        </li>
+
+        <li {% if 'dashboard' in request.META.PATH_INFO or 'account/settings' in request.META.PATH_INFO %}class="active"{% endif %}>
+            <a href="javascript:void(0)">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-briefcase"></i></span></div>
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Аккаунт </span><i class="icon-arrow"></i>
+                    </div>
+                </div> </a>
+            <ul class="sub-menu">
+                <li {% if '/account/settings/' == request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="{% url 'account-settings' %}"> <span class="title"> Настройки данных </span> </a>
+                </li>
+                <li {% if 'blockorder' in request.META.PATH_INFO %}class="active"{% endif %}>
+                    <a href="#" class="not-active-link"> <span class="title"> Управление системой </span> </a>
+                </li>
+                <li {% if 'dashboard' in request.META.PATH_INFO %}class="active"{% endif %}>
+{#                    <a href="{% url 'dashboard' %}"> <span class="title"> Статистика аккаунта </span> </a>#}
+                    <a href="#"> <span class="title"> Статистика аккаунта </span> </a>
+                </li>
+            </ul>
+        </li>
+
+        <li>
+            <a href="#">
+                <div class="item-content">
+                    <div class="item-media">
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-question"></i></span></div>
+                        {#											<div class="lettericon" data-text="Помощь" data-size="sm" data-char-count="2"></div>#}
+                    </div>
+                    <div class="item-inner">
+                        <span class="title"> Помощь </span>
+                    </div>
+                </div> </a>
+        </li>
+
+    </ul>
+    <!-- end: CORE FEATURES -->
+</nav>

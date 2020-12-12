@@ -1,0 +1,83 @@
+{% extends base_tpl %}
+{% load i18n admin_static bootstrapped_goodies_tags humanize %}
+{% block title %}Статистика Bittrex{% endblock %}
+{% block extrascript %}
+    <script>
+        $('.list-group a').click(function(e){
+            e.stopPropagation();
+        })
+    </script>
+{% endblock %}
+{% block main_content %}
+    <h1>Статистика {{ exchange }}</h1>
+    <table class="table table-striped table-hover">
+        <tr>
+            <th>Currency</th>
+            <th>Balance</th>
+            <th>Available</th>
+            <th>Pending</th>
+            <th>Requested</th>
+            <th>Uuid</th>
+            <th>CryptoAddress</th>
+        </tr>
+        {% for b in balances %}
+            {% if b.Balance %}
+                <tr>
+                    <td>{{ b.Currency }}</td>
+                    <td class="text-right">{{ b.Balance|floatformat:8 }}</td>
+                    <td class="text-right">{{ b.Available|floatformat:8 }}</td>
+                    <td class="text-right">{{ b.Pending|floatformat:8 }}</td>
+                    <td>{{ b.Requested|floatformat:8 }}</td>
+                    <td>{{ b.Uuid }}</td>
+                    <td>{{ b.CryptoAddress|default:'--' }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+
+    <h4>Открытые ордера</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <tr>
+                <th>Uuid</th>
+                <th>OrderUuid</th>
+                <th>Exchange</th>
+                <th>OrderType</th>
+                <th>Quantity</th>
+                <th>QuantityRemaining</th>
+                <th>Limit</th>
+                <th>CommissionPaid</th>
+                <th>Price</th>
+                <th>PricePerUnit</th>
+                <th>Opened</th>
+                <th>Closed</th>
+                <th>CancelInitiated</th>
+                <th>ImmediateOrCancel</th>
+                <th>IsConditional</th>
+                <th>Condition</th>
+                <th>ConditionTarget</th>
+            </tr>
+            {% for o in orders %}
+                <tr>
+                    <td>{{ o.Uuid }}</td>
+                    <td>{{ o.OrderUuid }}</td>
+                    <td>{{ o.Exchange }}</td>
+                    <td>{{ o.OrderType }}</td>
+                    <td>{{ o.Quantity|floatformat:8 }}</td>
+                    <td>{{ o.QuantityRemaining|floatformat:8 }}</td>
+                    <td>{{ o.Limit|floatformat:8 }}</td>
+                    <td>{{ o.CommissionPaid }}</td>
+                    <td>{{ o.Price }}</td>
+                    <td>{{ o.PricePerUnit }}</td>
+                    <td>{{ o.Opened }}</td>
+                    <td>{{ o.Closed }}</td>
+                    <td>{{ o.CancelInitiated }}</td>
+                    <td>{{ o.ImmediateOrCancel }}</td>
+                    <td>{{ o.IsConditional }}</td>
+                    <td>{{ o.Condition }}</td>
+                    <td>{{ o.ConditionTarget }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

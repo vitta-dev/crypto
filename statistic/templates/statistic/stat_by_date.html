@@ -1,0 +1,36 @@
+{% extends base_tpl %}
+{% load i18n admin_static bootstrapped_goodies_tags humanize %}
+{% block title %}Статистика Bittrex{% endblock %}
+{% block extrascript %}
+    <script>
+        $('.list-group a').click(function(e){
+            e.stopPropagation();
+        })
+    </script>
+{% endblock %}
+{% block main_content %}
+    <h1>Статистика по дням</h1>
+    <table class="table table-striped table-hover">
+        <tr>
+            <th>Дата</th>
+            <th>Бот</th>
+            <th>Пара</th>
+            <th>Покупки</th>
+            <th>Продажи</th>
+            <th>Профит</th>
+        </tr>
+        {% for s in stats %}
+            <tr>
+                <td>{{ s.date }}</td>
+                <td>{{ s.bot }}</td>
+                <td>{{ s.market }}</td>
+                <td>{{ s.buy }}<br>{{ s.buy_sum }}</td>
+                <td>{{ s.sell }}<br>{{ s.sell_sum }}</td>
+                <td></td>
+
+            </tr>
+        {% endfor %}
+    </table>
+
+
+{% endblock %}
