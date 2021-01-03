@@ -13,6 +13,8 @@ class BotAverage(BotBase):
 
     def check_order(self, order, count_active_orders=0):
         print_debug('BotAverage check_order')
+        # обновляем информацию из базы, для исключения коллизий со статусами
+        order.refresh_from_db()
         # TODO: сделать проверку ордеров
         print_debug("Check orders {} - {} {} [{}]".format(order.id, order.get_uuid(), order.type, order.status))
         if order.uuid:

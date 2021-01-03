@@ -30,5 +30,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(convert_status),
+        # migrations.RunPython(convert_status),
     ]

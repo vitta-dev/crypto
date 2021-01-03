@@ -60,6 +60,7 @@ docs/_build/
 target/
 
 /common_config.py
+settings_local.py
 py
 
 .idea/
