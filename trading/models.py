@@ -1274,3 +1274,25 @@ class ExchangeCurrencyStatistic(models.Model):
         self.price = Decimal(price_info['price'])
         self.usdt = Decimal(price_info['USDT'])
         self.save()
+
+
+class HistoryBalance(models.Model):
+
+    class Meta:
+        verbose_name = u'статистика баланса'
+        db_table = 'trading_history_balance'
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    btc = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
+    bnb = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
+    rate_bnb = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
+    usdt = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
+    rate_usdt = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
+
+    order = models.ForeignKey(MarketMyOrder, null=True, blank=True)
+
+    def __str__(self):
+        return '{}'.format(self.created_at)
+

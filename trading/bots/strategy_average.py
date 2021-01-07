@@ -28,6 +28,11 @@ class BotAverage(BotBase):
                 # если выполнился ордер на продажу отменяем все страховочные ордера
                 if order.status == MarketMyOrder.Status.FILLED:
                     self.cancel_safety_orders(order.from_order)
+
+                    # фиксируем историю баланса
+                    hb = self.fix_current_balance()
+                    hb.order = order.from_order
+                    hb.save()
                 # else:
                     # отключаем отмену ордера на продажу, продажа должна отменяться только
                     # в случае покупкпи страховочного ордера и выставить сразу новый ордер на продажу

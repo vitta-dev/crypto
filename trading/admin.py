@@ -8,7 +8,7 @@ from django.utils.html import format_html
 
 from trading.models import (
     BotStat, BotTestOrder, CheckMarketFilter, Currency, ExchangeCurrencyStatistic, Market, MarketBot, MarketBotRank,
-    MarketMyOrder, MarketOrderLog, MarketSettings, MarketSummary, MarketTickInterval
+    MarketMyOrder, MarketOrderLog, MarketSettings, MarketSummary, MarketTickInterval, HistoryBalance
 )
 from trading.utils import add_stock_fee
 
@@ -581,6 +581,11 @@ class BotTestOrderAdmin(admin.ModelAdmin):
     tickers.allow_tags = True
 
 
+class HistoryBalanceAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'btc', 'bnb', 'usdt', 'order')
+    readonly_fields = ['created_at', 'btc', 'bnb', 'usdt', 'order']
+
+
 admin.site.register(Currency, CurrencyAdmin)
 admin.site.register(ExchangeCurrencyStatistic, ExchangeCurrencyStatisticAdmin)
 admin.site.register(Market, MarketAdmin)
@@ -592,3 +597,4 @@ admin.site.register(BotTestOrder, BotTestOrderAdmin)
 admin.site.register(BotStat, BotStatAdmin)
 admin.site.register(CheckMarketFilter, CheckMarketFilterAdmin)
 admin.site.register(MarketTickInterval, MarketTickIntervalAdmin)
+admin.site.register(HistoryBalance, HistoryBalanceAdmin)

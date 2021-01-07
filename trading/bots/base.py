@@ -14,7 +14,7 @@ from trading.lib import (
     convert_ticker_to_decimal, convert_date, add_stock_fee, convert_ticker
 )
 from trading.lib import print_debug
-from trading.models import ExchangeCurrencyStatistic, MarketMyOrder, MarketOrderLog
+from trading.models import ExchangeCurrencyStatistic, MarketMyOrder, MarketOrderLog, HistoryBalance
 from trading.ta import TechnicalAnalysis
 
 # Если нет нужных пакетов - читаем тут: https://bablofil.ru/python-indicators/
@@ -48,6 +48,19 @@ class BotBase:
         self.market_name = market.get_market_name(self.exchange)
         self.api = self.bot.get_api()
         self.ta = TechnicalAnalysis(self.market)
+
+    def fix_current_balance(self) -> HistoryBalance:
+        """Фиксируем текущий баланс валют на бирже"""
+
+        available_balance_btc = self.api.get_currency_balance('BTC')
+        available_balance_bnb = self.api.get_currency_balance('BNB')
+        available_balance_usdt = self.api.get_currency_balance('USDT')
+        hb = HistoryBalance.objects.create(
+            btc=available_balance_btc,
+            bnb=available_balance_bnb,
+            usdt=available_balance_usdt,
+        )
+        return hb
 
     def get_heikin_ashi(self, chart_data):
 
@@ -239,6 +252,9 @@ class BotBase:
                     raise Exception('Не достаточно средств для открытия ордера')
                     # return False
 
+                # фиксируем историю баланса
+                hb = self.fix_current_balance()
+
                 order_res = self.api.buy_limit(
                     self.market_name,
                     quantity=can_buy,
@@ -264,6 +280,9 @@ class BotBase:
                                                          )
 
                     order.create_log(MarketOrderLog.Type.CREATE_ORDER, ticker_data=self.res_ticker_data)
+                    # фиксируем в истории баланса ордер перед покупкой которого была фиксация
+                    hb.order = order
+                    hb.save()
                     # if is_test:
                     #     order.status = MarketMyOrder.Status.FILLED
                     #     order.save()
