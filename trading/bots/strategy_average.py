@@ -95,8 +95,9 @@ class BotAverage(BotBase):
             from_order=order, kind=MarketMyOrder.Kind.SAFETY
         ).exclude(status=MarketMyOrder.Status.CANCELED).count()
         print('66 self.active_orders', self.active_orders)
-        safety_orders = MarketMyOrder.objects.filter(from_order=order, kind=MarketMyOrder.Kind.SAFETY,
-                                                     status__in=self.open_status)
+        safety_orders = MarketMyOrder.objects.filter(
+            from_order=order, kind=MarketMyOrder.Kind.SAFETY, status__in=self.open_status
+        )
         self.active_orders = safety_orders.count()
         print('69 self.total_safety_orders', self.total_safety_orders)
 
@@ -109,21 +110,23 @@ class BotAverage(BotBase):
                     safety_order = self.check_order_status(safety_order)
 
                     # проверяем если ордер страховочный ордер не исполнен и текущая цена ушла ниже, отменяем ордер
-                    if safety_order.status == MarketMyOrder.Status.OPEN \
-                            and safety_order.price > self.get_price_for_sell():
+                    if (safety_order.status == MarketMyOrder.Status.OPEN
+                            and safety_order.price > self.get_price_for_sell()):
                         self.cancel_order(safety_order)
 
-        self.total_safety_orders = MarketMyOrder.objects\
-            .filter(from_order=order, kind=MarketMyOrder.Kind.SAFETY) \
-            .exclude(status=MarketMyOrder.Status.CANCELED).count()
+        self.total_safety_orders = MarketMyOrder.objects.filter(
+            from_order=order, kind=MarketMyOrder.Kind.SAFETY
+        ).exclude(
+            status=MarketMyOrder.Status.CANCELED
+        ).count()
 
         self.active_orders = MarketMyOrder.objects.filter(from_order=order, kind=MarketMyOrder.Kind.SAFETY,
                                                           status__in=self.open_status).count()
 
         print('if ', self.active_orders, ' < ', self.bot.average_safety_orders_active_count,
               ' and ', self.total_safety_orders, ' < ', self.bot.average_safety_orders_max_count)
-        if self.active_orders < self.bot.average_safety_orders_active_count \
-                and self.total_safety_orders < self.bot.average_safety_orders_max_count:
+        if (self.active_orders < self.bot.average_safety_orders_active_count
+                and self.total_safety_orders < self.bot.average_safety_orders_max_count):
             print_debug('create_safety_orders')
             self.create_safety_orders(order)
 
@@ -146,14 +149,23 @@ class BotAverage(BotBase):
         is_safety = True
         while is_safety:
             print_debug('while is_safety:')
-            if self.active_orders < self.bot.average_safety_orders_active_count \
-                    and self.total_safety_orders < self.bot.average_safety_orders_max_count:
+            if (self.active_orders < self.bot.average_safety_orders_active_count
+                    and self.total_safety_orders < self.bot.average_safety_orders_max_count):
                 price, amount = self.next_safety_price(last_order)
-                last_order = self.create_safety_order(order, price, amount)
-                print('create order', last_order)
-                self.active_orders += 1
-                self.total_safety_orders += 1
-                print('while', self.active_orders, self.total_safety_orders)
+                # проверка доступного баланса
+                market_currency = self.market.market_currency.name
+                available_balance_market = self.api.get_currency_balance(market_currency)
+                if amount < available_balance_market:
+                    is_safety = False
+                    print_debug('Not enough money for sell')
+                    # TODO: сделать оповещение о нехватке баланса
+                    # TODO: решить что делать в таких случаях
+                else:
+                    last_order = self.create_safety_order(order, price, amount)
+                    print('create order', last_order)
+                    self.active_orders += 1
+                    self.total_safety_orders += 1
+                    print('while', self.active_orders, self.total_safety_orders)
             else:
                 is_safety = False
                 print_debug('is_safety = False')

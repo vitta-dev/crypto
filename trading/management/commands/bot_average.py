@@ -61,7 +61,15 @@ class Command(BaseCommand):
                 print('open_orders', orders)
 
                 if orders:
-                    for order in orders:
+                    # проверяем основные ордера
+                    main_orders = orders.filter(kind=MarketMyOrder.Kind.MAIN)
+                    for order in main_orders:
+                        order.refresh_from_db()
+                        bot_active_pairs += tb.check_order(order)
+
+                    # проверяем страховочные
+                    safety_orders = orders.filter(kind=MarketMyOrder.Kind.SAFETY)
+                    for order in safety_orders:
                         order.refresh_from_db()
                         bot_active_pairs += tb.check_order(order)
                 else:

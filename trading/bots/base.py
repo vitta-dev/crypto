@@ -25,7 +25,8 @@ getcontext().prec = 8
 class BotBase:
 
     satoshi_1 = Decimal(0.00000001)
-    stock_fee = Decimal(0.0025)         # Какую комиссию берет биржа
+    # stock_fee = Decimal(0.0025)         # Какую комиссию берет биржа
+    stock_fee = Decimal(0.0075)         # Какую комиссию берет биржа - Binance в BNB 0,0075%
 
     bot = None
     is_test = True
@@ -150,8 +151,9 @@ class BotBase:
     def create_buy_price(self, price, amount, kind=MarketMyOrder.Kind.MAIN, from_order=None):
         """создаем ордер на покупку"""
 
-        order_res = self.api.buy_limit(self.market_name, quantity=amount, rate=price,
-                                       is_test=self.is_test)
+        order_res = self.api.buy_limit(
+            self.market_name, quantity=amount, rate=price, is_test=self.is_test
+        )
 
         order_uuid = self.api.get_uuid_order(order_res)
         ext_id = self.api.get_ext_id_order(order_res)
@@ -191,7 +193,8 @@ class BotBase:
             # current_rate = Decimal(ticker_data['Ask'])
             if self.ticker_data['Bid']:
                 current_rate = self.get_price_for_buy()
-                can_buy = self.bot.max_spend / current_rate
+                # can_buy = self.bot.max_spend / current_rate
+                can_buy = self.bot.average_safety_start_order_amount / current_rate
                 # TODO: проверять минимально возможную покупку и сигнализировать, если пытаемся купить меньше
 
                 pair = self.market_name
@@ -230,7 +233,8 @@ class BotBase:
                     print('sum: ', Decimal(can_buy) * Decimal(current_rate))
 
                 # если денег не достаточно ордер не создаем
-                if available_balance < Decimal(current_rate):
+                # if available_balance < Decimal(current_rate):
+                if available_balance < Decimal(can_buy):
                     print('Не достаточно средств для открытия ордера')
                     raise Exception('Не достаточно средств для открытия ордера')
                     # return False
@@ -334,6 +338,10 @@ class BotBase:
             if settings.BOT_PRINT_DEBUG:
                 print('-2 quantity: ', order_amount, ', rate: ', choosen_rate)
                 print('sum: ', order_amount * choosen_rate)
+
+            base_currency = self.market.base_currency.name
+            market_currency = self.market.market_currency.name
+            available_balance = self.api.get_currency_balance(base_currency)
 
             order_res = self.api.sell_limit(self.market_name, quantity=order_amount, rate=choosen_rate, is_test=self.is_test)
             order_uuid = self.api.get_uuid_order(order_res)

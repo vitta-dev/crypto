@@ -437,6 +437,76 @@ class MarketBot(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
+    @property
+    def get_max_sum_for_orders(self):
+        """Получает максимальную сумму, необходимую для сделки"""
+
+        from trading.bots.strategy_average import BotAverage
+
+        total_amount = self.average_safety_start_order_amount
+        # print('total_amount', total_amount)
+
+        api = self.get_api()
+        market = self.markets.first()
+        # print('market', market)
+        tb = BotAverage(self, market)
+        tb.get_tickers()
+        current_rate = tb.get_price_for_sell()
+        # print('current_rate', current_rate)
+
+        current_rate = tb.get_price_for_buy()
+        total_amount_btc = self.average_safety_start_order_amount
+        total_amount1 = self.max_spend / current_rate
+        total_amount = self.average_safety_start_order_amount / current_rate
+
+        main_order_btc = total_amount_btc
+        main_order = total_amount
+        main_order1 = total_amount1
+        # print('first', total_amount)
+
+        current_amount_bnb = total_amount_btc
+        current_amount = total_amount
+        current_amount1 = total_amount1
+        safety_orders = {}
+        safety_orders1 = {}
+        for so in range(1, self.average_safety_orders_max_count + 1):
+            current_amount += current_amount * self.average_safety_step
+            current_amount1 += current_amount1 * self.average_safety_step
+            print(so, current_amount)
+            total_amount_btc += current_amount_bnb
+            total_amount += current_amount
+            total_amount1 += current_amount1
+            safety_orders[so] = current_amount
+            safety_orders1[so] = current_amount1
+
+        base_currency = market.base_currency.name
+        market_currency = market.market_currency.name
+
+        available_balance = api.get_currency_balance(base_currency)
+        available_balance_market = api.get_currency_balance(market_currency)
+        # print('base_currency', base_currency, available_balance)
+        # print('market_currency', market_currency, available_balance_market)
+        commission = total_amount / 100 * Decimal(0.075)
+        commission_btc = total_amount_btc / 100 * Decimal(0.075)
+
+        btc_bnb = available_balance
+
+        data = {
+            'total_amount': total_amount,
+            # 'total_amount1': total_amount1,
+            # 'total_amount_bnb': total_amount_btc,
+            'commission_bnb': total_amount / 100 * Decimal(0.075),
+            market.base_currency.name: available_balance,
+            '{}_{}'.format(market.base_currency.name, market.market_currency.name): available_balance / current_rate,
+            market.market_currency.name: available_balance_market,
+            'current_rate': current_rate,
+            # 'safety_orders': safety_orders,
+            # 'safety_orders1': safety_orders1,
+            # 'main_order': main_order,
+            # 'main_order1': main_order1,
+        }
+        return data
+
     def get_api(self):
         if self.exchange.code == 'binance':
             from trading.backedns.binance.client import ApiBinance
@@ -780,7 +850,7 @@ class MarketMyOrder(models.Model):
             total_amount += so.amount
             sum_prices += so.price
             if so.commission:
-                total_spent += so.spent + so.commission
+                total_spent += so.spent + so.commission     # 0.075
             else:
                 total_spent += so.price * so.amount + so.price * so.amount / 100 * Decimal(0.25)
 

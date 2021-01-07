@@ -1,0 +1,41 @@
+{% extends 'admin/change_form.html' %}
+{% load static %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script src="{% static 'admin/bot.js' %}"></script>
+{% endblock %}
+
+{% block custom_info %}
+    <div id="custom_info">
+        {% with info=original.get_max_sum_for_orders %}
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-hover table-striped">
+                        <tr>
+                            <td>BTC (на счету)</td>
+                            <td>{{ info.BTC }}</td>
+                        </tr>
+                        <tr>
+                            <td>BTC in BNB</td>
+                            <td>{{ info.BTC_BNB }}</td>
+                        </tr>
+                        <tr>
+                            <td>BNB (на счету)</td>
+                            <td>{{ info.BNB }}</td>
+                        </tr>
+                        <tr {% if info.total_amount > info.BTC_BNB  %}class="danger"{% endif %}>
+                            <td>Общая сумма ордеров BNB</td>
+                            <td>{{ info.total_amount }}</td>
+                        </tr>
+                        <tr {% if info.commission_bnb > info.BNB  %}class="danger"{% endif %}>
+                            <td>Комиссия BNB</td>
+                            <td>{{ info.commission_bnb }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        {% endwith %}
+{#    {{ original.get_max_sum_for_orders }}#}
+    </div>
+{% endblock %}

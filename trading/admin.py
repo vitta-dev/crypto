@@ -425,6 +425,7 @@ class MarketBotRankInline(admin.TabularInline):
 
 
 class MarketBotAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/bot_form_change.html'
     save_as = True
     list_display = ['name', 'exchange', 'is_test', 'bot_last_run', 'max_spend', 'markup', 'order_life_time',
                     'test_bot', 'stat_bot']
