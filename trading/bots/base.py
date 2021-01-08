@@ -247,7 +247,7 @@ class BotBase:
 
                 # если денег не достаточно ордер не создаем
                 # if available_balance < Decimal(current_rate):
-                if available_balance < Decimal(can_buy):
+                if available_balance < Decimal(can_buy) * Decimal(current_rate):
                     print('Не достаточно средств для открытия ордера')
                     raise Exception('Не достаточно средств для открытия ордера')
                     # return False
