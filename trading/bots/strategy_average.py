@@ -139,14 +139,15 @@ class BotAverage(BotBase):
 
     @staticmethod
     def get_last_safety_order(from_order):
-
+        print('def get_last_safety_order', from_order)
         try:
             last_order = MarketMyOrder.objects.filter(from_order=from_order, kind=MarketMyOrder.Kind.SAFETY).latest('id')
         except MarketMyOrder.DoesNotExist:
+            print('except MarketMyOrder.DoesNotExist:')
             last_order = None
         if not last_order:
             last_order = from_order
-
+        print('last_order', last_order)
         return last_order
 
     def create_safety_orders(self, order):
