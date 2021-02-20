@@ -143,7 +143,7 @@ class BotAverage(BotBase):
         try:
             last_order = MarketMyOrder.objects.filter(from_order=from_order, kind=MarketMyOrder.Kind.SAFETY).latest('id')
         except MarketMyOrder.DoesNotExist:
-            print('except MarketMyOrder.DoesNotExist:')
+            print_debug('except MarketMyOrder.DoesNotExist:')
             last_order = None
         if not last_order:
             last_order = from_order
@@ -165,6 +165,7 @@ class BotAverage(BotBase):
                 print('price, amount', price, amount)
                 # проверка доступного баланса
                 market_currency = self.market.market_currency.name
+                print('market_currency', market_currency)
                 available_balance_market = self.api.get_currency_balance(market_currency)
                 print('amount < available_balance_market', amount, available_balance_market)
                 if amount < available_balance_market:
