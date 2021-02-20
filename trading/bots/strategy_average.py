@@ -172,6 +172,7 @@ class BotAverage(BotBase):
                 available_balance_market1 = self.api.get_currency_balance(base_currency)
                 print('amount < available_balance_market', amount, available_balance_market)
                 print('available_balance_market1 ', available_balance_market1)
+                print('amount * price', amount * price)
                 if amount < available_balance_market:
                     is_safety = False
                     print_debug('Not enough money for safety')
