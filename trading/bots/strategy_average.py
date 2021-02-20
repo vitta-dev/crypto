@@ -156,11 +156,13 @@ class BotAverage(BotBase):
         last_order = self.get_last_safety_order(order)
 
         is_safety = True
+        print('is_safety', is_safety)
         while is_safety:
             print_debug('while is_safety:')
             if (self.active_orders < self.bot.average_safety_orders_active_count
                     and self.total_safety_orders < self.bot.average_safety_orders_max_count):
                 price, amount = self.next_safety_price(last_order)
+                print('price, amount', price, amount)
                 # проверка доступного баланса
                 market_currency = self.market.market_currency.name
                 available_balance_market = self.api.get_currency_balance(market_currency)
