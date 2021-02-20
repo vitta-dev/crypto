@@ -130,6 +130,8 @@ class BotAverage(BotBase):
 
         print('if ', self.active_orders, ' < ', self.bot.average_safety_orders_active_count,
               ' and ', self.total_safety_orders, ' < ', self.bot.average_safety_orders_max_count)
+        print(self.active_orders < self.bot.average_safety_orders_active_count
+              and self.total_safety_orders < self.bot.average_safety_orders_max_count)
         if (self.active_orders < self.bot.average_safety_orders_active_count
                 and self.total_safety_orders < self.bot.average_safety_orders_max_count):
             print_debug('create_safety_orders')
