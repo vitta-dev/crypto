@@ -1280,16 +1280,17 @@ class HistoryBalance(models.Model):
 
     class Meta:
         verbose_name = u'статистика баланса'
+        verbose_name_plural = u'статистика балансов'
         db_table = 'trading_history_balance'
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     btc = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
-    bnb = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
-    rate_bnb = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
-    usdt = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
-    rate_usdt = models.DecimalField('BTC', max_digits=24, decimal_places=8, default=0)
+    bnb = models.DecimalField('BNB', max_digits=24, decimal_places=8, default=0)
+    rate_bnb = models.DecimalField('rate BNB', max_digits=24, decimal_places=8, default=0)
+    usdt = models.DecimalField('USDT', max_digits=24, decimal_places=8, default=0)
+    rate_usdt = models.DecimalField('rate USDT', max_digits=24, decimal_places=8, default=0)
 
     order = models.ForeignKey(MarketMyOrder, null=True, blank=True)
 
