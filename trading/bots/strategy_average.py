@@ -173,6 +173,7 @@ class BotAverage(BotBase):
                 print('amount < available_balance_market', amount, available_balance_market)
                 print('available_balance_market1 ', available_balance_market1)
                 print('amount * price', amount * price)
+                print('amount / price', amount / price)
                 # if amount < available_balance_market:
                 if amount > available_balance_market1:
                     is_safety = False
