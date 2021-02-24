@@ -175,7 +175,7 @@ class BotAverage(BotBase):
                 print('amount * price', amount * price)
                 print('amount / price', amount / price)
                 # if amount < available_balance_market:
-                if amount > available_balance_market1:
+                if amount * price > available_balance_market1:
                     is_safety = False
                     print_debug('Not enough money for safety')
                     # TODO: сделать оповещение о нехватке баланса
