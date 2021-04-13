@@ -26,7 +26,7 @@ class Command(BaseCommand):
         is_bot = True
 
         while is_bot:
-            is_bot = False
+            # is_bot = False
 
             bot_active_pairs = 0
 
