@@ -13,19 +13,19 @@
                 <div class="col-md-6">
                     <table class="table table-hover table-striped">
                         <tr>
-                            <td>BTC (на счету)</td>
-                            <td>{{ info.BTC }}</td>
+                            <td>{{ info.base_currency_name }} (на счету)</td>
+                            <td>{{ info.base_currency }}</td>
                         </tr>
                         <tr>
-                            <td>BTC in BNB</td>
-                            <td>{{ info.BTC_BNB }}</td>
+                            <td>{{ info.base_currency_name }} in {{ info.market_currency_name }}</td>
+                            <td>{{ info.base_in_market }}</td>
                         </tr>
                         <tr>
-                            <td>BNB (на счету)</td>
-                            <td>{{ info.BNB }}</td>
+                            <td>{{ info.market_currency_name }} (на счету)</td>
+                            <td>{{ info.market_currency }}</td>
                         </tr>
                         <tr {% if info.total_amount > info.BTC_BNB  %}class="danger"{% endif %}>
-                            <td>Общая сумма ордеров BNB</td>
+                            <td>Общая сумма ордеров {{ info.market_currency_name }}</td>
                             <td>{{ info.total_amount }}</td>
                         </tr>
                         <tr {% if info.commission_bnb > info.BNB  %}class="danger"{% endif %}>

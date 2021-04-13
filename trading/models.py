@@ -442,6 +442,7 @@ class MarketBot(models.Model):
         """Получает максимальную сумму, необходимую для сделки"""
 
         from trading.bots.strategy_average import BotAverage
+        print('get_max_sum_for_orders')
 
         total_amount = self.average_safety_start_order_amount
         # print('total_amount', total_amount)
@@ -455,6 +456,7 @@ class MarketBot(models.Model):
         # print('current_rate', current_rate)
 
         current_rate = tb.get_price_for_buy()
+        print('current_rate', current_rate)
         total_amount_btc = self.average_safety_start_order_amount
         total_amount1 = self.max_spend / current_rate
         total_amount = self.average_safety_start_order_amount / current_rate
@@ -496,9 +498,11 @@ class MarketBot(models.Model):
             # 'total_amount1': total_amount1,
             # 'total_amount_bnb': total_amount_btc,
             'commission_bnb': total_amount / 100 * Decimal(0.075),
-            market.base_currency.name: available_balance,
-            '{}_{}'.format(market.base_currency.name, market.market_currency.name): available_balance / current_rate,
-            market.market_currency.name: available_balance_market,
+            'base_currency_name': market.base_currency.name,
+            'base_currency': available_balance,
+            'base_in_market': available_balance / current_rate,
+            'market_currency_name': market.market_currency.name,
+            'market_currency': available_balance_market,
             'current_rate': current_rate,
             # 'safety_orders': safety_orders,
             # 'safety_orders1': safety_orders1,
