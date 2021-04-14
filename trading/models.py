@@ -897,7 +897,10 @@ class MarketMyOrder(models.Model):
             """
 
         spent_buy, spent_sell = self.get_spent()
-        diff = Decimal(spent_sell - spent_buy).quantize(Decimal('.00000000'))
+        try:
+            diff = Decimal(spent_sell - spent_buy).quantize(Decimal('.00000000'))
+        except InvalidOperation:
+            diff = Decimal(spent_sell - spent_buy).quantize(Decimal('.00000'))
         # diff = spent_sell - spent_buy
 
         return diff

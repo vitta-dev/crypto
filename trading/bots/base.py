@@ -530,7 +530,8 @@ class BotBase:
         try:
             new_rate = new_rate.quantize(Decimal('.00000000'))
         except InvalidOperation:
-            pass
+            new_rate = new_rate.quantize(Decimal('.00000'))
+
         return new_rate
 
     def add_stock_fee_new_test(self, rate, orders_buy_count=1):
