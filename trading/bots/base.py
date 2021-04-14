@@ -527,7 +527,10 @@ class BotBase:
     def add_stock_fee(self, rate):
         """Добавляем комиссию"""
         new_rate = rate + (rate * self.stock_fee * 2)
-        new_rate = new_rate.quantize(Decimal('.00000000'))
+        try:
+            new_rate = new_rate.quantize(Decimal('.00000000'))
+        except InvalidOperation:
+            pass
         return new_rate
 
     def add_stock_fee_new_test(self, rate, orders_buy_count=1):
