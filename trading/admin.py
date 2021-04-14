@@ -340,7 +340,7 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
                 try:
                     s = "%0.8f" % Decimal(val).quantize(Decimal('.00000000'))
                 except InvalidOperation:
-                    s = "%0.8f" % val
+                    s = "{}".format(val)
 
                 str_format += format_html('{}: {}<br>', key, s)
 
