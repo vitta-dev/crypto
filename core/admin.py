@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
 from django.forms.models import BaseInlineFormSet
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
 

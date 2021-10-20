@@ -1,5 +1,5 @@
 {% extends base_tpl %}
-{% load i18n admin_static bootstrapped_goodies_tags humanize utils_charts %}
+{% load i18n static bootstrapped_goodies_tags humanize utils_charts %}
 {% block title %}Ордера{% endblock %}
 {% block extrascript %}
     <style>
@@ -142,7 +142,7 @@
             <tr>
                 <td class="hidden-xs">
                     <div class="block">
-                        <a href="{% url 'chart-market-bot' order.market.name order.bot.name %}" class="block text-large"> {{ order.market }} </a>
+                        <a href="{% url 'trading:chart-market-bot' order.market.name order.bot.name %}" class="block text-large"> {{ order.market }} </a>
                         {{ order.bot }}<br>
                     </div>
                 </td>

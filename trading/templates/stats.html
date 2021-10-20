@@ -1,5 +1,5 @@
 {% extends base_tpl %}
-{% load i18n admin_static bootstrapped_goodies_tags humanize %}
+{% load i18n static bootstrapped_goodies_tags humanize %}
 {% block title %}Статистика{% endblock %}
 {% block extrascript %}
     <script>
@@ -143,11 +143,11 @@
                                                         </li>
                                                     </ul>
                                                 <div class="list-group pull-right">
-                                                    <a href="{% url 'chart-market' data.name %}" target="_blank"
+                                                    <a href="{% url 'trading:chart-market' data.name %}" target="_blank"
                                                        style="z-index: 1000;"
                                                        class="btn btn-dark-grey"><i class="fa fa-bar-chart"></i>
                                                     </a>
-                                                    <a href="{% url 'stat:orders-list' bot.exchange.code data.name %}"
+                                                    <a href="{% url 'statistic:orders-list' bot.exchange.code data.name %}"
                                                        target="_blank" style="z-index: 1000;"
                                                        class="btn btn-dark-grey"><i class="fa fa-books"></i>
                                                     </a>

@@ -5,15 +5,18 @@ from typing import Tuple
 from django.db import models
 from django.utils import timezone
 from django.db.models import Q
-from django.contrib.postgres.fields import JSONField
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 
 class Exchange(models.Model):
     class Meta:
-        verbose_name = u'биржа'
-        verbose_name_plural = u'биржы'
+        verbose_name = 'биржа'
+        verbose_name_plural = 'биржы'
         db_table = 'trading_exchange'
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -31,8 +34,8 @@ class Exchange(models.Model):
 class Currency(models.Model):
     class Meta:
         db_table = 'trading_currency'
-        verbose_name = u'валюта'
-        verbose_name_plural = u'валюты'
+        verbose_name = 'валюта'
+        verbose_name_plural = 'валюты'
         ordering = ['name']
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -73,8 +76,8 @@ class Currency(models.Model):
 
 class Market(models.Model):
     class Meta:
-        verbose_name = u'пара'
-        verbose_name_plural = u'пары'
+        verbose_name = 'пара'
+        verbose_name_plural = 'пары'
         db_table = 'trading_market'
         unique_together = ['base_currency', 'market_currency']
         ordering = ['base_currency', 'market_currency']
@@ -83,9 +86,9 @@ class Market(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
 
     market_currency = models.ForeignKey(Currency, verbose_name='MarketCurrency',
-                                        related_name="market_currencies")
+                                        related_name="market_currencies", on_delete=models.CASCADE)
     base_currency = models.ForeignKey(Currency, verbose_name='BaseCurrency',
-                                      related_name="base_currencies")
+                                      related_name="base_currencies", on_delete=models.CASCADE)
 
     name = models.CharField('название', max_length=100)
     code = models.CharField('код', max_length=100, default='-')
@@ -118,8 +121,8 @@ class MarketSettings(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
-    exchange = models.ForeignKey(Exchange, default=1)
-    market = models.ForeignKey(Market, default=1, related_name='settings')
+    exchange = models.ForeignKey(Exchange, default=1, on_delete=models.CASCADE)
+    market = models.ForeignKey(Market, default=1, related_name='settings', on_delete=models.CASCADE)
 
     is_active = models.BooleanField(default=False)
 
@@ -128,15 +131,15 @@ class MarketSettings(models.Model):
 
 class MarketSummary(models.Model):
     class Meta:
-        verbose_name = u'Summary 24H'
-        verbose_name_plural = u'Summary 24H'
+        verbose_name = 'Summary 24H'
+        verbose_name_plural = 'Summary 24H'
         db_table = 'trading_market_summary'
 
     created_at = models.DateTimeField('ADDED', default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField(default=timezone.now)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
     name = models.CharField('DisplayMarketName', max_length=100, blank=True, null=True)
 
     high = models.DecimalField('24HR HIGH', max_digits=24, decimal_places=8, default=0)  # 0.01350000,
@@ -154,15 +157,15 @@ class MarketSummary(models.Model):
 
 class MarketRank(models.Model):
     class Meta:
-        verbose_name = u'Market Rank'
-        verbose_name_plural = u'Markets Rank'
+        verbose_name = 'Market Rank'
+        verbose_name_plural = 'Markets Rank'
         db_table = 'trading_market_rank'
 
     created_at = models.DateTimeField('ADDED', default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField(default=timezone.now)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
     name = models.CharField('DisplayMarketName', max_length=100, blank=True, null=True)
 
     rank = models.DecimalField('rank', max_digits=24, decimal_places=8, default=0)
@@ -175,7 +178,7 @@ class MarketOrderBook(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
 
     quantity = models.DecimalField('Quantity', max_digits=24, decimal_places=8, default=0)
     rate = models.DecimalField('rate', max_digits=24, decimal_places=8, default=0)
@@ -199,7 +202,7 @@ class MarketTrade(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField('TimeStamp')
 
-    market = models.ForeignKey(Market, verbose_name='Market')
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
 
     price = models.DecimalField('Price', max_digits=24, decimal_places=8, default=0)
     quantity = models.DecimalField('Quantity', max_digits=24, decimal_places=8, default=0)
@@ -277,8 +280,8 @@ class CloseOrders(models.Manager):
 
 class MarketTickInterval(models.Model):
     class Meta:
-        verbose_name = u'интервал'
-        verbose_name_plural = u'интервалы'
+        verbose_name = 'интервал'
+        verbose_name_plural = 'интервалы'
         db_table = 'trading_tick_interval'
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -301,7 +304,7 @@ class MarketBot(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
-    exchange = models.ForeignKey(Exchange, verbose_name='Биржа', default=1)
+    exchange = models.ForeignKey(Exchange, verbose_name='Биржа', default=1, on_delete=models.CASCADE)
 
     name = models.CharField('название', max_length=100, unique=True)
     is_test = models.BooleanField(default=True)
@@ -324,7 +327,7 @@ class MarketBot(models.Model):
                                            help_text='процент роста после кторого фиксируем максимальную цену')
     trailing_cost_fall = models.DecimalField('% падения', max_digits=5, decimal_places=2, default=1,
                                              help_text='процент падения для фиксации прибыли')
-    # currency = models.ForeignKey(Currency, verbose_name='Валюта')
+    # currency = models.ForeignKey(Currency, verbose_name='Валюта', on_delete=models.CASCADE)
 
     tick_intervals = models.ManyToManyField(MarketTickInterval, verbose_name='Интервалы')
 
@@ -412,7 +415,7 @@ class MarketBot(models.Model):
     is_market_rank = models.BooleanField('Подбирать пары по рангу', default=False)
     max_rank_pairs = models.IntegerField('Максимальное кол-во пар', default=10)
     rank_base_currency = models.ForeignKey(Currency, verbose_name='Базовая валюта', blank=True, null=True,
-                                           limit_choices_to={'is_base': True}, )
+                                           limit_choices_to={'is_base': True}, on_delete=models.CASCADE )
 
     markets = models.ManyToManyField(Market, verbose_name='Пары', blank=True)
 
@@ -617,8 +620,8 @@ class MarketBot(models.Model):
 
 class MarketBotRank(models.Model):
     class Meta:
-        verbose_name = u'Market Rank'
-        verbose_name_plural = u'Markets Rank'
+        verbose_name = 'Market Rank'
+        verbose_name_plural = 'Markets Rank'
         db_table = 'trading_market_bot_rank'
         ordering = ['-rank']
 
@@ -626,8 +629,8 @@ class MarketBotRank(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField(default=timezone.now)
 
-    market = models.ForeignKey(Market, verbose_name='Market', related_name='bot_rank')
-    bot = models.ForeignKey(MarketBot, verbose_name='MarketBot', related_name='bot_rank')
+    market = models.ForeignKey(Market, verbose_name='Market', related_name='bot_rank', on_delete=models.CASCADE)
+    bot = models.ForeignKey(MarketBot, verbose_name='MarketBot', related_name='bot_rank', on_delete=models.CASCADE)
 
     rank = models.DecimalField('rank', max_digits=24, decimal_places=8, default=0)
 
@@ -668,8 +671,8 @@ class MarketMyOrder(models.Model):
     filled_at = models.DateTimeField(blank=True, null=True)
     cancelled_at = models.DateTimeField(blank=True, null=True)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
-    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True)
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
+    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True, on_delete=models.CASCADE)
 
     price = models.DecimalField('Price', max_digits=24, decimal_places=8, default=0, help_text='Цена покупки/продажи')
     amount = models.DecimalField('Amount', max_digits=24, decimal_places=8, default=0, help_text='Кол-во')
@@ -679,7 +682,7 @@ class MarketMyOrder(models.Model):
     commission = models.DecimalField('Commission', max_digits=24, decimal_places=8, default=0, help_text='Комиссия')
 
     # from_order = models.OneToOneField('self', blank=True, null=True)
-    from_order = models.ForeignKey('self', blank=True, null=True)
+    from_order = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
     is_close = models.BooleanField(default=False)
 
     get_order_result = JSONField(blank=True, null=True)     # json.dumps(data)
@@ -1064,8 +1067,8 @@ class MarketMyOrder(models.Model):
 
 class MarketOrderLog(models.Model):
     class Meta:
-        verbose_name = u'Order Log'
-        verbose_name_plural = u'Orders Log'
+        verbose_name = 'Order Log'
+        verbose_name_plural = 'Orders Log'
         db_table = 'trading_market_order_log'
 
     class Type:
@@ -1096,7 +1099,7 @@ class MarketOrderLog(models.Model):
     created_at = models.DateTimeField('ADDED', default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
-    order = models.ForeignKey(MarketMyOrder, verbose_name='MarketBot', related_name='logs')
+    order = models.ForeignKey(MarketMyOrder, verbose_name='MarketBot', related_name='logs', on_delete=models.CASCADE)
 
     max_price = models.DecimalField('max price', max_digits=24, decimal_places=8, default=0)
     ticker_data = JSONField(blank=True, null=True)
@@ -1117,8 +1120,8 @@ class BotTestOrder(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     period = models.DateTimeField(blank=True, null=True)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
-    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True)
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
+    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True, on_delete=models.CASCADE)
 
     price = models.DecimalField('Price', max_digits=24, decimal_places=8, default=0, help_text='Цена покупки/продажи')
 
@@ -1176,8 +1179,8 @@ class BotStat(models.Model):
 
     date = models.DateField()
 
-    market = models.ForeignKey(Market, verbose_name='Market')
-    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True)
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
+    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True, on_delete=models.CASCADE)
 
     buy = models.IntegerField('Ордеров на покупку', default=0)
     buy_sum = models.DecimalField('Продано на сумму', max_digits=24, decimal_places=8, default=0, )
@@ -1220,16 +1223,16 @@ class CheckMarketFilter(models.Model):
 
 class ExchangeCurrency(models.Model):
     class Meta:
-        verbose_name = u'валюта на бирже'
-        verbose_name_plural = u'валюты на бирже'
+        verbose_name = 'валюта на бирже'
+        verbose_name_plural = 'валюты на бирже'
         db_table = 'trading_exchange_currency'
         unique_together = ['currency', 'exchange']
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    currency = models.ForeignKey(Currency, verbose_name='Валюта', related_name="exchange_currencies")
-    exchange = models.ForeignKey(Exchange, verbose_name='Биржа', related_name="currencies")
+    currency = models.ForeignKey(Currency, verbose_name='Валюта', related_name="exchange_currencies", on_delete=models.CASCADE)
+    exchange = models.ForeignKey(Exchange, verbose_name='Биржа', related_name="currencies", on_delete=models.CASCADE)
 
     start_amount = models.DecimalField('Начальный баланс', max_digits=24, decimal_places=8, default=0)
     free = models.DecimalField('Текущий баланс', max_digits=24, decimal_places=8, default=0)
@@ -1242,8 +1245,8 @@ class ExchangeCurrency(models.Model):
 class ExchangeCurrencyStatistic(models.Model):
 
     class Meta:
-        verbose_name = u'статистика валюты на бирже'
-        verbose_name_plural = u'статистика валют на бирже'
+        verbose_name = 'статистика валюты на бирже'
+        verbose_name_plural = 'статистика валют на бирже'
         db_table = 'trading_exchange_currency_statistic'
 
     class Operation:
@@ -1260,9 +1263,9 @@ class ExchangeCurrencyStatistic(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # exchange_currency = models.ForeignKey(ExchangeCurrency, verbose_name='Валюта')
-    currency = models.ForeignKey(Currency, verbose_name='Валюта', null=True)
-    order = models.ForeignKey(MarketMyOrder, verbose_name='Order', null=True, blank=True)
+    # exchange_currency = models.ForeignKey(ExchangeCurrency, verbose_name='Валюта', on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, verbose_name='Валюта', null=True, on_delete=models.CASCADE)
+    order = models.ForeignKey(MarketMyOrder, verbose_name='Order', null=True, blank=True, on_delete=models.CASCADE)
 
     free = models.DecimalField('Доступно', max_digits=24, decimal_places=8, default=0)
     locked = models.DecimalField('Заблокировано', max_digits=24, decimal_places=8, default=0)
@@ -1286,8 +1289,8 @@ class ExchangeCurrencyStatistic(models.Model):
 class HistoryBalance(models.Model):
 
     class Meta:
-        verbose_name = u'статистика баланса'
-        verbose_name_plural = u'статистика балансов'
+        verbose_name = 'статистика баланса'
+        verbose_name_plural = 'статистика балансов'
         db_table = 'trading_history_balance'
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1299,7 +1302,7 @@ class HistoryBalance(models.Model):
     usdt = models.DecimalField('USDT', max_digits=24, decimal_places=8, default=0)
     rate_usdt = models.DecimalField('rate USDT', max_digits=24, decimal_places=8, default=0)
 
-    order = models.ForeignKey(MarketMyOrder, null=True, blank=True)
+    order = models.ForeignKey(MarketMyOrder, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{}'.format(self.created_at)

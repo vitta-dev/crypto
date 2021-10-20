@@ -1,21 +1,13 @@
 # -*- coding:utf-8 -*-
-import math
 from decimal import *
 
-import numpy
-import talib
-from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
 
-from trading.config import TICKINTERVAL_FIVEMIN, TICKINTERVAL_FIFTEENMIN
-from trading.filters import MACDFilter
-from trading.models import Market, MarketMyOrder, MarketBot, BotTestOrder, BotStat
-from trading.utils import get_chart_data, convert_ticker, get_heikin_ashi, TechnicalAnalysis
-from trading.backedns.bittrex.client import ApiBittrex
-from trading.backedns.binance.client import ApiBinance
 from statistic.forms import OrderFilter, paginate
+from trading.backedns.binance.client import ApiBinance
+from trading.backedns.bittrex.client import ApiBittrex
+from trading.models import Market, BotStat
 
 
 @staff_member_required
@@ -65,6 +57,7 @@ def index(request, exchange_name='binance'):
 @staff_member_required
 def orders(request, exchange_name='binance', market_name='BTH-ETH'):
     """Список ордеров на бирже"""
+    print('===================== orderss')
     base_tpl = 'admin/base.html'
     market = get_object_or_404(Market, name=market_name)
 

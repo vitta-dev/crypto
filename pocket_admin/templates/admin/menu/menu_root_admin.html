@@ -8,13 +8,15 @@
             <a href="{% url 'admin:index' %}">
                 <div class="item-content">
                     <div class="item-media">
-                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-home"></i></span></div>
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i
+                                class="fa fa-home"></i></span></div>
                         {#											<div class="lettericon" data-text="Панель управления" data-size="sm" data-char-count="2"></div>#}
                     </div>
                     <div class="item-inner">
                         <span class="title"> Панель управления </span>
                     </div>
-                </div> </a>
+                </div>
+            </a>
         </li>
 
         <li>
@@ -28,7 +30,8 @@
                     <div class="item-inner">
                         <span class="title"> Боты </span>
                     </div>
-                </div> </a>
+                </div>
+            </a>
         </li>
 
         <li>
@@ -42,11 +45,12 @@
                     <div class="item-inner">
                         <span class="title"> Ордера </span>
                     </div>
-                </div> </a>
+                </div>
+            </a>
         </li>
 
         <li>
-            <a href="{% url 'stat:orders' %}">
+            <a href="{% url 'statistic:orders' %}">
                 <div class="item-content">
                     <div class="item-media">
                         <div class="letter-icon-wrapper size-sm">
@@ -56,23 +60,26 @@
                     <div class="item-inner">
                         <span class="title"> Ордера new </span>
                     </div>
-                </div> </a>
+                </div>
+            </a>
         </li>
 
         <li>
-            <a href="{% url 'stats' %}">
+            <a href="{% url 'trading:stats' %}">
                 <div class="item-content">
                     <div class="item-media">
-                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-table"></i></span></div>
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i
+                                class="fa fa-table"></i></span></div>
                         {#											<div class="lettericon" data-text="Панель управления" data-size="sm" data-char-count="2"></div>#}
                     </div>
                     <div class="item-inner">
                         <span class="title"> Статистика </span>
                     </div>
-                </div> </a>
+                </div>
+            </a>
         </li>
         <li>
-            <a href="{% url 'stat:main' %}">
+            <a href="{% url 'statistic:main' %}">
                 <div class="item-content">
                     <div class="item-media">
                         <div class="letter-icon-wrapper size-sm"><span class="letter-icon">
@@ -82,31 +89,36 @@
                     <div class="item-inner">
                         <span class="title"> Статистика Binance </span>
                     </div>
-                </div> </a>
+                </div>
+            </a>
         </li>
         <li>
-            <a href="{% url 'stat:main-bittrex' %}">
+            <a href="{% url 'statistic:main-bittrex' %}">
                 <div class="item-content">
                     <div class="item-media">
-                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-table"></i></span></div>
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i
+                                class="fa fa-table"></i></span></div>
 
                     </div>
                     <div class="item-inner">
                         <span class="title"> Статистика Bittrex </span>
                     </div>
-                </div> </a>
+                </div>
+            </a>
         </li>
         <li>
-            <a href="{% url 'charts' %}">
+            <a href="{% url 'trading:charts' %}">
                 <div class="item-content">
                     <div class="item-media">
-                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i class="fa fa-bar-chart"></i></span></div>
+                        <div class="letter-icon-wrapper size-sm"><span class="letter-icon"><i
+                                class="fa fa-bar-chart"></i></span></div>
                         {#											<div class="lettericon" data-text="Панель управления" data-size="sm" data-char-count="2"></div>#}
                     </div>
                     <div class="item-inner">
                         <span class="title"> Графики </span>
                     </div>
-                </div> </a>
+                </div>
+            </a>
         </li>
 
         <li class="active open">
@@ -114,8 +126,8 @@
                 <div class="panel-title">Разница в процентах</div>
                 <input id=fnum type='text' placeholder="Первое число" onkeyup="return proverka(this);">
                 <input id=snum type='text' placeholder="Второе число" onkeyup="return proverka(this);">
-                <input id=result type='text' disabled="disabled" readonly='readonly' />
-                <input class="btn btn-green" type=button value='Рассчитать' onclick=diff_per();  return false;>
+                <input id=result type='text' disabled="disabled" readonly='readonly'/>
+                <input class="btn btn-green" type=button value='Рассчитать' onclick=diff_per(); return false;>
                 <input class="btn btn-grey" type=reset value=Сбросить></center>
             </form>
         </li>
@@ -123,7 +135,6 @@
 
     </ul>
     <!-- end: MAIN NAVIGATION MENU -->
-
 
 
 </nav>
@@ -140,22 +151,22 @@
 
 
     function diff_per() {
-        var fnum = $('#fnum').val().replace(",",".");
-        var snum = $('#snum').val().replace(",",".");
-        if(fnum==''){
+        var fnum = $('#fnum').val().replace(",", ".");
+        var snum = $('#snum').val().replace(",", ".");
+        if (fnum == '') {
             alert('Введите первое число');
-        }else if(snum==''){
+        } else if (snum == '') {
             alert('Введите второе число');
-        }else if(fnum==0 && snum==0){
+        } else if (fnum == 0 && snum == 0) {
             alert('Enter Values Properly');
-        }else {
-            var diff = fnum-snum;
-            var avg = (parseInt(fnum)+parseFloat(snum))/2;
-            var per = snum/fnum*100-100;
-            if(snum<fnum){
-                per = (-1)*per;
+        } else {
+            var diff = fnum - snum;
+            var avg = (parseInt(fnum) + parseFloat(snum)) / 2;
+            var per = snum / fnum * 100 - 100;
+            if (snum < fnum) {
+                per = (-1) * per;
             }
-            $('#result').val(per.toFixed(2)+'%');
+            $('#result').val(per.toFixed(2) + '%');
         }
     }
 </script>
