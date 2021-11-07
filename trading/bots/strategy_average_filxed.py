@@ -6,13 +6,13 @@ from trading.models import MarketMyOrder, MarketOrderLog
 from trading.lib import print_debug
 
 
-class BotAverage(BotBase):
+class BotAverageFixed(BotBase):
     total_safety_orders = 0
     active_orders = 0
     open_status = [MarketMyOrder.Status.OPEN, MarketMyOrder.Status.PART_FILLED]
 
     def check_order(self, order, count_active_orders=0):
-        print_debug('BotAverage check_order')
+        print_debug('BotAverageFixed check_order')
         # обновляем информацию из базы, для исключения коллизий со статусами
         order.refresh_from_db()
         # TODO: сделать проверку ордеров
@@ -94,7 +94,7 @@ class BotAverage(BotBase):
         return count_active_orders
 
     def check_safety_orders(self, order):
-        """проверяем страховочные ордера"""
+        # проверяем страховочные ордера
         print_debug('** check_safety_orders')
         self.total_safety_orders = MarketMyOrder.objects.filter(
             from_order=order, kind=MarketMyOrder.Kind.SAFETY
@@ -164,18 +164,18 @@ class BotAverage(BotBase):
                 price, amount = self.next_safety_price(last_order)
                 print('price, amount', price, amount)
                 # проверка доступного баланса
-                market_currency = self.market.market_currency.name
-                base_currency = self.market.base_currency.name
-                print('market_currency', market_currency)
-                print('base_currency', base_currency)
-                available_balance_market = self.api.get_currency_balance(market_currency)
-                available_balance_market1 = self.api.get_currency_balance(base_currency)
+                market_currency = self.market.market_currency.name  # BNB
+                base_currency = self.market.base_currency.name      # BTC
+                print('market_currency BNB', market_currency)
+                print('base_currency BTC', base_currency)
+                available_balance_market = self.api.get_currency_balance(market_currency)   # BNB
+                available_balance_market1 = self.api.get_currency_balance(base_currency)    # BTC
                 print('amount < available_balance_market', amount, available_balance_market)
                 print('available_balance_market1 ', available_balance_market1)
                 print('amount * price', amount * price)
                 print('amount / price', amount / price)
                 # if amount < available_balance_market:
-                if amount * price > available_balance_market1:
+                if amount * price >= available_balance_market1:
                     is_safety = False
                     print_debug('Not enough money for safety')
                     # TODO: сделать оповещение о нехватке баланса
@@ -191,7 +191,7 @@ class BotAverage(BotBase):
                 print_debug('is_safety = False')
 
     def cancel_safety_orders(self, from_order):
-        """Отменяем страховочные ордера"""
+        # отменяем страховочные ордера
         safety_orders = MarketMyOrder.objects.filter(from_order=from_order,
                                                      kind=MarketMyOrder.Kind.SAFETY,
                                                      status=MarketMyOrder.Status.OPEN)
@@ -200,7 +200,7 @@ class BotAverage(BotBase):
             self.cancel_order(order)
 
     def cancel_sell_order(self, from_order):
-        """Отменяем ордер на продажу"""
+        # отменяем ордер на продажу
         sell_orders = MarketMyOrder.objects.filter(from_order=from_order,
                                                    type=MarketMyOrder.Type.SELL,
                                                    status=MarketMyOrder.Status.OPEN)
@@ -209,6 +209,8 @@ class BotAverage(BotBase):
             self.cancel_order(order, cancel_type=MarketMyOrder.CancelStatus.SAFETY)
 
     def next_safety_price(self, last_order):
+        """Получить цену и количество монет для следующего страховочного ордера"""
+
         print_debug('next_safety_price')
         print_debug(last_order.price)
         print_debug(last_order.amount)
@@ -259,24 +261,6 @@ class BotAverage(BotBase):
                 new_sell_order = self.create_fix_order(from_order)
 
         return new_sell_order
-
-    def create_sell_by_current_price(self, from_order: MarketMyOrder) -> Optional[MarketMyOrder]:
-        """Создаем ордер на продажу по текущему курсу, без учета профита"""
-
-        # отменяем страховочные ордера
-        self.cancel_safety_orders(from_order)
-
-        # отменяем ордер на продажу
-        self.cancel_sell_order(from_order)
-
-        # выставляем ордер на продажу по текущему курсу
-        total_amount, average_price = from_order.get_amount_for_sell_new()
-        rate = self.get_price_for_sell()
-        order_spent = Decimal(total_amount * rate)
-
-        sell_order = self.place_order(total_amount, rate, order_spent, from_order)
-
-        return sell_order
 
     def create_fix_order(self,
                          order: MarketMyOrder,

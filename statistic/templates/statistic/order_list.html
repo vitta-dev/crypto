@@ -149,20 +149,21 @@
                 <td>
                 <td>
                     <div class="block">
-                        [ {{ order.id }} ]<br><br>
-                        {% if order.status == 'CLOSED' %}
-                            <span class="label label-success">Закрыт</span>
-                        {% elif order.status == 'CANCELED' %}
-                            <span class="label partition-dark-grey">Отменен</span><br>
-                            <small class="text-muted">{{ order.cancelled_at|date:'d-m-Y H:i' }}</small>
-                        {% elif order.status == 'FILLED' %}
-                            <span class="label partition-green">Исполнен</span><br>
-                            <small class="text-muted">{{ order.filled_at|date:'d-m-Y H:i' }}</small>
-                        {% elif order.status == 'PART_FILLED' %}
-                            <span class="label partition-blue">Частично исполнен</span>
-                        {% elif order.status == 'OPEN' %}
-                            <span class="label label-info">Открыт</span>
-                        {% endif %}
+                        [ <a href="{% url 'statistic:order-detail' order.id %}">{{ order.id }} ]</a><br><br>
+                        {% include 'statistic/_order_status.html' %}
+{#                        {% if order.status == 'CLOSED' %}#}
+{#                            <span class="label label-success">Закрыт</span>#}
+{#                        {% elif order.status == 'CANCELED' %}#}
+{#                            <span class="label partition-dark-grey">Отменен</span><br>#}
+{#                            <small class="text-muted">{{ order.cancelled_at|date:'d-m-Y H:i' }}</small>#}
+{#                        {% elif order.status == 'FILLED' %}#}
+{#                            <span class="label partition-green">Исполнен</span><br>#}
+{#                            <small class="text-muted">{{ order.filled_at|date:'d-m-Y H:i' }}</small>#}
+{#                        {% elif order.status == 'PART_FILLED' %}#}
+{#                            <span class="label partition-blue">Частично исполнен</span>#}
+{#                        {% elif order.status == 'OPEN' %}#}
+{#                            <span class="label label-info">Открыт</span>#}
+{#                        {% endif %}#}
                     </div>
                 </td>
                 <td>
@@ -230,63 +231,7 @@
                 </td>
                 <td class="visible-lg">
                     {% if order.status == 'FILLED' %}
-                        {% with wait_price=order.get_sell_price current_price=order.get_current_price %}
-                            <div class="col-xs-6 no-padding text-center">
-                                <div class="padding-5">
-                                    <small class="">CurrentPrice
-                                        <br>
-                                        <strong>{{ current_price|floatformat:8  }}</strong></small>
-                                </div>
-                            </div>
-                            <div class="col-xs-6 no-padding text-center">
-                                <div class="border-right border-dark padding-5">
-                                    <small class="">WaitPrice
-                                        <br>
-                                        <strong>{{ wait_price.price|floatformat:8  }}</strong></small>
-                                </div>
-                            </div>
-                            {#                            {% diff_percent wait_price.price current_price True as percent %}#}
-                            {% progress_price order.get_average_price wait_price.price current_price as percent %}
-                            <div class="col-xs-12">
-                                {% if percent.is_increase %}
-                                    <span class="block padding-top-10">
-                                        <div class="progress progress-xs no-radius background-dark no-margin">
-                                            <div class="progress-bar progress-bar-purple"
-                                                 role="progressbar"
-                                                 aria-valuenow="{{ percent.value }}" aria-valuemin="0" aria-valuemax="100"
-                                                 style="width: {{ percent.value }}%;">
-                                                <span class="sr-only"> {{ percent.value }}% </span>
-                                            </div>
-                                        </div>
-                                    </span>
-                                {% else %}
-                                    <div class="col-xs-6 progress-decrease">
-                                        <span class="block padding-top-10">
-                                            <div class="progress progress-xs no-radius background-dark no-margin">
-                                                <div class="progress-bar progress-bar-danger pull-right"
-                                                     role="progressbar"
-                                                     aria-valuenow="{{ percent.value }}" aria-valuemin="0" aria-valuemax="100"
-                                                     style="width: {{ percent.value }}%;">
-                                                    <span class="sr-only"> {{ percent.value }}% </span>
-                                                </div>
-                                            </div>
-                                        </span>
-                                    </div>
-                                    <div class="col-xs-6 progress-decrease">
-                                        <span class="block padding-top-10">
-                                            <div class="progress progress-xs no-radius background-dark no-margin">
-                                                <div class="progress-bar progress-bar-purple"
-                                                     role="progressbar"
-                                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
-                                                     style="width: 0;">
-                                                    <span class="sr-only"> 0% </span>
-                                                </div>
-                                            </div>
-                                        </span>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endwith %}
+                        {% include 'statistic/_order_progress.html' %}
                     {% elif order.status == 'CLOSED' %}
                         {% for o in order.get_sell_orders %}
                             <div class="col-xs-6 no-padding text-center">

@@ -1,0 +1,13 @@
+{% if order.status == 'CLOSED' %}
+    <span class="label label-success">Закрыт</span>
+{% elif order.status == 'CANCELED' %}
+    <span class="label partition-dark-grey">Отменен</span><br>
+    <small class="text-muted">{{ order.cancelled_at|date:'d-m-Y H:i' }}</small>
+{% elif order.status == 'FILLED' %}
+    <span class="label partition-green">Исполнен</span><br>
+    <small class="text-muted">{{ order.filled_at|date:'d-m-Y H:i' }}</small>
+{% elif order.status == 'PART_FILLED' %}
+    <span class="label partition-blue">Частично исполнен</span>
+{% elif order.status == 'OPEN' %}
+    <span class="label label-info">Открыт</span>
+{% endif %}

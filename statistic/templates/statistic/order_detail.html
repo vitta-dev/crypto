@@ -1,0 +1,251 @@
+{% extends base_tpl %}
+{% load i18n static bootstrapped_goodies_tags humanize utils_charts %}
+{% block title %}Ордера{% endblock %}
+{% block extrascript %}
+    <style>
+        .progress-decrease {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    </style>
+    <script>
+        $('.list-group a').click(function (e) {
+            e.stopPropagation();
+        })
+
+        $('#panic_sell').on('click', function() {
+            swal({
+                title: "Продать по текущему курсу?",
+                text: "Точно уверены, что хотим продать все по текущему курсу?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#007AFF",
+                confirmButtonText: "Да, продать!",
+                cancelButtonText: "Нет, не продавать!",
+                closeOnConfirm: false
+            }, function () {
+                $('#order_panic_sell').submit();
+            });
+            e.preventDefault
+        });
+
+
+    </script>
+{% endblock %}
+{% block main_content %}
+    <h1>Ордер [ {{ order.id }} ]</h1>
+    <table class="table no-margin table-hover">
+        <tbody>
+        <tr>
+            <td class="hidden-xs">
+                <div class="block">
+                    <a href="{% url 'trading:chart-market-bot' order.market.name order.bot.name %}"
+                       class="block text-large"> {{ order.market }} </a>
+                    {{ order.bot }}<br>
+                </div>
+            </td>
+            <td>
+                <div class="block">
+                    {% include 'statistic/_order_status.html' %}
+                </div>
+            </td>
+            <td>
+                <div class="">
+                    <div class="col-xs-4 no-padding text-center">
+                        <div class="border-right border-dark padding-5">
+                            <small class="text-muted">Average Price</small><br>
+                            <span class="">
+                            {% with p=order.get_amount_for_sell_new %}
+                                {{ p.1|floatformat:8 }}
+                            {% endwith %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 no-padding  text-center">
+                        <div class="padding-5 border-dark border-right">
+                            <small class="text-muted">Куплено {{ order.market.market_currency }}</small><br>
+                            <span class="">{{ order.get_amount_for_sell.0 }}</span>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 no-padding text-center">
+                        <div class="padding-5">
+                            <small class="text-muted">Потрачено {{ order.market.base_currency }}</small><br>
+                            <span class="">{{ order.get_average_spend|floatformat:8 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                {% if order.status == 'CLOSED' %}
+                    {% with profit=order.get_profit %}
+                        <span class="{% if profit > 0 %}text-success{% elif profit < 0 %}text-danger{% endif %}">
+                            {{ profit|floatformat:8 }}<br>
+                            {{ order.get_profit_percent|floatformat:2 }}%
+                        </span>
+                    {% endwith %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" class="visible-lg">
+                {% if order.status == 'FILLED' %}
+                    {% include 'statistic/_order_progress.html' %}
+                {% elif order.status == 'CLOSED' %}
+                    {% for o in order.get_sell_orders %}
+                        <div class="col-xs-4 no-padding text-center">
+                            <div class="border-right border-dark padding-5">
+                                <small class="text-muted">Price
+                                    <br>
+                                    <strong>{{ o.price }}</strong></small>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 no-padding text-center">
+                            <div class="border-right border-dark padding-5">
+                                <small class="text-muted">Amount
+                                    <br>
+                                    <strong>{{ o.amount }}</strong></small>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 no-padding text-center">
+                            <div class="padding-5">
+                                <small class="text-muted">
+                                    <strong>{{ o.spent }}</strong></small>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding text-center">
+                            <div class="padding-5">
+                                <small class="text-muted">
+                                    <strong>{{ o.filled_at }}</strong></small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    {% with info=order.bot.get_max_sum_for_orders %}
+        <div class="row">
+            <div class="col-md-7">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th colspan="2">При продаже по текущему курсу</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% with profit=order.calculation_current_profit %}
+                        <tr>
+                            <td>Профит %</td>
+                            <td> {{ profit.diff_percent|floatformat:2 }} %
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Профит {{ order.market.base_currency }}</td>
+                            <td> {{ profit.diff_amount|floatformat:8 }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Получим {{ order.market.base_currency }}</td>
+                            <td>
+                                {{ profit.current_sell|floatformat:8 }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Разница в курсе</td>
+                            <td>
+                                {{ profit.diff_price|floatformat:8 }}
+                            </td>
+                        </tr>
+                    {% endwith %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            <span class="btn btn-default" id="panic_sell">
+                                Продать по текущему курсу
+                            </span>
+                            <form id="order_panic_sell" action="{% url 'statistic:order-panic-sell' order.id %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="uuid" value="{{ order.get_hash }}">
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-5">
+                <table class="table table-hover table-striped">
+                    <tr>
+                        <td>{{ info.base_currency_name }} (на счету)</td>
+                        <td>{{ info.base_currency|floatformat:8 }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ info.base_currency_name }} in {{ info.market_currency_name }}</td>
+                        <td>{{ info.base_in_market|floatformat:8 }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ info.market_currency_name }} (на счету)</td>
+                        <td>{{ info.market_currency|floatformat:8 }}</td>
+                    </tr>
+                    <tr {% if info.total_amount > info.BTC_BNB %}class="danger"{% endif %}>
+                        <td>Общая сумма ордеров {{ info.market_currency_name }}</td>
+                        <td>{{ info.total_amount|floatformat:8 }}</td>
+                    </tr>
+                    <tr {% if info.commission_bnb > info.BNB %}class="danger"{% endif %}>
+                        <td>Комиссия BNB</td>
+                        <td>{{ info.commission_bnb|floatformat:8 }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    {% endwith %}
+    <h3>Ордера</h3>
+    <table class="table no-margin table-hover">
+        <thead>
+        <tr>
+            <td>ID</td>
+            <td>Тип</td>
+            <td>Создан / Исполнен</td>
+            <td>Статус</td>
+            <td>Цена</td>
+            <td>Куплено {{ order.market.market_currency }}</td>
+            <td>Потрачено {{ order.market.base_currency }}</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>Основной</td>
+            <td>
+                {{ order.created_at }}<br>
+                {{ order.filled_at|default_if_none:'--' }}
+            </td>
+            <td>{{ order.get_status_display }}</td>
+            <td>{{ order.price }}</td>
+            <td>{{ order.amount }}</td>
+            <td>{{ order.spent }}</td>
+        </tr>
+        {% for safety in order.get_safety_orders %}
+            <tr>
+                <td>{{ safety.id }}</td>
+                <td>Страховочный</td>
+                <td>
+                    {{ safety.created_at }}<br>
+                    {{ safety.filled_at }}
+                </td>
+                <td>{{ safety.get_status_display }}</td>
+                <td>{{ safety.price }}</td>
+                <td>{{ safety.amount }}</td>
+                <td>{{ safety.spent }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3"></td>
+            <td>Итого</td>
+            <td>{{ order.get_average_price|floatformat:8 }}</td>
+            <td>{{ order.get_amount_for_sell.0 }}</td>
+            <td>{{ order.get_average_spend|floatformat:8 }}</td>
+        </tr>
+        </tbody>
+    </table>
+{% endblock %}

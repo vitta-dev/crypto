@@ -434,10 +434,13 @@ class MarketBotAdmin(admin.ModelAdmin):
     #           ('is_rsi', ),
     #           ('is_macd', ),
     #           'tick_intervals']
-
+    readonly_fields = ['block_panic_sell_at']
     fieldsets = (
         (None, {
             'fields': ('name', 'exchange', 'is_test', 'is_ha')
+        }),
+        ('Panic Sell', {
+            'fields': (('is_block_panic_sell', 'block_panic_sell_at'), )
         }),
         (None, {
             'fields': (('max_spend', 'markup', 'order_life_time',), )

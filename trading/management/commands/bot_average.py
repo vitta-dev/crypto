@@ -28,7 +28,7 @@ class Command(BaseCommand):
             try:
                 bot = MarketBot.objects.get(name=bot_name)
                 bot.bot_last_run = timezone.now()
-                bot.save()
+                bot.save(update_fields=['bot_last_run'])
             except MarketBot.DoesNotExist:
                 print('Bot "{}" Does Not Exist'.format(bot_name))
                 return False
@@ -72,7 +72,7 @@ class Command(BaseCommand):
                     for order in safety_orders:
                         order.refresh_from_db()
                         bot_active_pairs += tb.check_order(order)
-                else:
+                elif not bot.is_block_panic_sell:
                     # Проверяем тренд, если рынок в нужном состоянии, выставляем ордер на покупку
                     trend_buy = tb.check_trend_buy()
                     if trend_buy:

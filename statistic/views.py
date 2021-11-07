@@ -1,13 +1,16 @@
 # -*- coding:utf-8 -*-
 from decimal import *
 
+from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 
 from statistic.forms import OrderFilter, paginate
 from trading.backedns.binance.client import ApiBinance
 from trading.backedns.bittrex.client import ApiBittrex
-from trading.models import Market, BotStat
+from trading.models import Market, BotStat, MarketMyOrder
 
 
 @staff_member_required
@@ -127,3 +130,38 @@ def list_orders(request):
     }
 
     return render(request, 'statistic/order_list.html', context)
+
+
+@staff_member_required
+def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
+    """Детальная информация о заказе"""
+
+    # TODO: вынести определние базового шаблона в декоратор
+    base_tpl = 'admin/base.html'
+
+    order = get_object_or_404(MarketMyOrder, id=order_id)
+
+    context = {
+        'base_tpl': base_tpl,
+        'order': order,
+    }
+
+    return render(request, 'statistic/order_detail.html', context)
+
+
+@staff_member_required
+def order_panic_sell(request, order_id):
+    """Создаем продажу по текущему курсу"""
+
+    order = get_object_or_404(MarketMyOrder, id=order_id)
+    uuid = request.POST.get('uuid')
+
+    if order.is_check_hash(uuid):
+
+        message = order.panic_sell()
+        messages.success(request, message)
+
+    else:
+        messages.error(request, 'Ошибочный uuid')
+
+    return redirect('statistic:order-detail', order.id)
