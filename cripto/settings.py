@@ -187,7 +187,7 @@ BINANCE_API_KEY = ''
 BINANCE_SECRET_KEY = ''
 
 try:
-    from cripto.settings_local import *
+    from .settings_local import *
 except ImportError:
     pass
 
