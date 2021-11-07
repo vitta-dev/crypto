@@ -1,6 +1,6 @@
 django
-psycopg2==2.9.1
-Pillow==8.3.2
+psycopg2
+Pillow
 django-debug-toolbar
 python-bittrex==0.2.1
 django-suit==0.2.25
