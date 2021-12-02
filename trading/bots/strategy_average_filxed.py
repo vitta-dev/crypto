@@ -93,8 +93,76 @@ class BotAverageFixed(BotBase):
 
         return count_active_orders
 
+    def check_order_short(self, order, count_active_orders=0):
+        """Проверка ордера при short стратегии"""
+        print_debug('BotAverageFixed check_order short')
+        # обновляем информацию из базы, для исключения коллизий со статусами
+        order.refresh_from_db()
+        # TODO: сделать проверку ордеров
+        print_debug("Check orders {} - {} {} [{}]".format(order.id, order.get_uuid(), order.type, order.status))
+        if order.uuid:
+            if order.status in [MarketMyOrder.Status.OPEN, MarketMyOrder.Status.PART_FILLED]:
+                order = self.check_order_status(order)
+
+            self.get_tickers()
+
+            if order.type == MarketMyOrder.Type.BUY:
+
+                # если выполнился ордер на покупку отменяем все страховочные ордера
+                if order.status == MarketMyOrder.Status.FILLED:
+                    self.cancel_safety_orders(order.from_order)
+
+                    # фиксируем историю баланса
+                    hb = self.fix_current_balance()
+                    hb.order = order.from_order
+                    hb.save()
+                # else:
+                    # отключаем отмену ордера на продажу, продажа должна отменяться только
+                    # в случае покупкпи страховочного ордера и выставить сразу новый ордер на продажу
+                    # # если ордер на продажу проверяем stop loss
+                    # if self.bot.is_trailing_cost:  # проверяем trailing cost
+                    #     order = self.check_trailing_resell(order)
+                    # else:
+                    #     self.check_stop_loss_sell(order)
+                    #
+                    # # TODO: сделать проверку на отмену ордера на продажу при необходимости
+
+            if order.type == MarketMyOrder.Type.SELL:
+                print_debug('---------- CHECK BUY --------')
+                if (order.status == MarketMyOrder.Status.FILLED and not order.is_close
+                        and order.kind == MarketMyOrder.Kind.MAIN):
+
+                    # if not self.check_create_fix_order(order):
+                    # проверяем страховочные ордера
+                    self.check_safety_orders(order)
+
+                    # если ордер на покупку был выполнен проверяем рынок и создаем ордер на продажу,
+                    # для фиксации прибыли как только цена будет на нужном уровне
+                    self.create_fix_sell(order)
+
+                # если выполнился страховочный ордер на покупку, отменяем продажу
+                # и выставляем новый ордер на продажу с учетом изменившейся цены с профитом
+                if order.kind == MarketMyOrder.Kind.SAFETY and order.status == MarketMyOrder.Status.FILLED:
+                    self.cancel_sell_order(order.from_order)
+                    self.create_fix_sell(order.from_order)
+
+                if order.status in [MarketMyOrder.Status.OPEN]:
+                    # Если buy не был исполнен, и прошло достаточно времени для отмены ордера,
+                    # отменяем
+                    if self.check_cancel_order(order):
+                        # print_debug('Пора отменять ордер %s' % order)
+                        print_debug('cancel order')
+                        market_name = order.market.get_market_name(order.bot.exchange.code)
+                        cancel_res = self.api.cancel(order.uuid, market_name=market_name, is_test=self.is_test)
+                        print_debug(cancel_res)
+                        if cancel_res:
+                            order.cancel_order()
+
+        return count_active_orders
+
     def check_safety_orders(self, order):
-        # проверяем страховочные ордера
+        """проверяем страховочные ордера"""
+
         print_debug('** check_safety_orders')
         self.total_safety_orders = MarketMyOrder.objects.filter(
             from_order=order, kind=MarketMyOrder.Kind.SAFETY
@@ -125,8 +193,9 @@ class BotAverageFixed(BotBase):
             status=MarketMyOrder.Status.CANCELED
         ).count()
 
-        self.active_orders = MarketMyOrder.objects.filter(from_order=order, kind=MarketMyOrder.Kind.SAFETY,
-                                                          status__in=self.open_status).count()
+        self.active_orders = MarketMyOrder.objects.filter(
+            from_order=order, kind=MarketMyOrder.Kind.SAFETY, status__in=self.open_status
+        ).count()
 
         print('if ', self.active_orders, ' < ', self.bot.average_safety_orders_active_count,
               ' and ', self.total_safety_orders, ' < ', self.bot.average_safety_orders_max_count)
@@ -151,7 +220,7 @@ class BotAverageFixed(BotBase):
         return last_order
 
     def create_safety_orders(self, order):
-        # создаем страховочные ордера
+        """создаем страховочные ордера"""
         print('def create_safety_orders')
         last_order = self.get_last_safety_order(order)
 
@@ -191,7 +260,7 @@ class BotAverageFixed(BotBase):
                 print_debug('is_safety = False')
 
     def cancel_safety_orders(self, from_order):
-        # отменяем страховочные ордера
+        """отменяем страховочные ордера"""
         safety_orders = MarketMyOrder.objects.filter(from_order=from_order,
                                                      kind=MarketMyOrder.Kind.SAFETY,
                                                      status=MarketMyOrder.Status.OPEN)
@@ -200,10 +269,23 @@ class BotAverageFixed(BotBase):
             self.cancel_order(order)
 
     def cancel_sell_order(self, from_order):
-        # отменяем ордер на продажу
-        sell_orders = MarketMyOrder.objects.filter(from_order=from_order,
-                                                   type=MarketMyOrder.Type.SELL,
-                                                   status=MarketMyOrder.Status.OPEN)
+        """отменяем ордер на продажу"""
+        sell_orders = MarketMyOrder.objects.filter(
+            from_order=from_order,
+            type=MarketMyOrder.Type.SELL,
+            status=MarketMyOrder.Status.OPEN
+        )
+
+        for order in sell_orders:
+            self.cancel_order(order, cancel_type=MarketMyOrder.CancelStatus.SAFETY)
+
+    def cancel_buy_order(self, from_order):
+        """отменяем ордер на покупку"""
+        buy_orders = MarketMyOrder.objects.filter(
+            from_order=from_order,
+            type=MarketMyOrder.Type.BUY,
+            status=MarketMyOrder.Status.OPEN
+        )
 
         for order in sell_orders:
             self.cancel_order(order, cancel_type=MarketMyOrder.CancelStatus.SAFETY)
@@ -261,6 +343,36 @@ class BotAverageFixed(BotBase):
                 new_sell_order = self.create_fix_order(from_order)
 
         return new_sell_order
+
+    def create_fix_buy(self, from_order: MarketMyOrder) -> Union[MarketMyOrder, bool]:
+        """Проверяем есть ли ордер на покупку"""
+
+        new_buy_order = False
+
+        # получаем сумму и среднюю цену с учетом прибыли
+        total_amount, average_price = from_order.get_amount_for_buy()
+        min_profit_price = self.get_profit_price(average_price)
+
+        try:
+            # если ордер на продажу есть, сверяем выставленную сумму и прайс
+            sell_order = MarketMyOrder.objects.get(from_order=from_order,
+                                                   type=MarketMyOrder.Type.SELL,
+                                                   status=MarketMyOrder.Status.OPEN)
+
+            # если сумма не совпадает отменяем ордер на продажу и выставляем новый
+            if sell_order and (sell_order.amount != total_amount or sell_order.price != min_profit_price):
+                self.cancel_order(sell_order, MarketMyOrder.CancelStatus.SAFETY)
+                new_buy_order = self.create_fix_order(from_order)
+
+        except MarketMyOrder.DoesNotExist:
+            sell_orders = MarketMyOrder.objects.filter(
+                from_order=from_order, type=MarketMyOrder.Type.SELL
+            ).exclude(status=MarketMyOrder.Status.CANCELED)
+            if sell_orders.count() == 0:
+                # выставляем ордер на продажу
+                new_buy_order = self.create_fix_order(from_order)
+
+        return new_buy_order
 
     def create_fix_order(self,
                          order: MarketMyOrder,

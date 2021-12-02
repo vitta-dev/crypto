@@ -445,6 +445,14 @@ class MarketBot(models.Model):
     average_safety_step = models.DecimalField('Множитель шага страховочных ордеров',
                                               max_digits=5, decimal_places=2, default=1)
 
+    class Strategy(models.TextChoices):
+        """Стратегия"""
+
+        LONG = 'long', 'Long (на росте)'
+        SHORT = 'short', 'Short (на падении)'
+
+    strategy = models.CharField('Стратегия', max_length=5, choices=Strategy.choices, default=Strategy.LONG)
+
     def __str__(self):
         return '{}'.format(self.name)
 
@@ -768,7 +776,7 @@ class MarketMyOrder(models.Model):
     def get_hash(self) -> str:
         """Возвращает hash"""
 
-        str_hash = f'{self.id}{self.uuid}'
+        str_hash = '{}{}'.format(self.id, self.uuid)
         return hashlib.md5(str_hash.encode('utf-8')).hexdigest()
 
     def is_check_hash(self, str_hash) -> bool:
@@ -901,6 +909,48 @@ class MarketMyOrder(models.Model):
 
         for so in safety_orders:
             orders_buy_count += 1
+            total_amount += so.amount
+            sum_prices += so.price
+            if so.commission:
+                total_spent += so.spent + so.commission  # 0.075
+            else:
+                total_spent += so.price * so.amount + so.price * so.amount / 100 * Decimal(0.25)
+
+        average_price = total_spent / total_amount
+
+        return total_amount, average_price
+
+    def get_amount_for_buy(self) -> Tuple[Decimal, Decimal]:
+        """Расчитываем количество монет для покупки"""
+        orders_sell_count = 1
+
+        # получаем данные по основному ордеру
+        if self.from_order:
+            from_order = self.from_order
+        else:
+            from_order = self
+
+        total_amount = from_order.amount
+        sum_prices = from_order.price
+        # total_spent = from_order.amount * from_order.price
+        if from_order.commission:
+            total_spent = from_order.spent + from_order.commission
+        else:
+            total_spent = from_order.price * from_order.amount + (
+                    from_order.price * from_order.amount / 100 * Decimal(0.25)
+            )
+
+        # TODO: сделать учет не полностью выкупленных ордеров
+        # получаем исполненные страховочные ордера
+        safety_orders = MarketMyOrder.objects.filter(
+            from_order=from_order,
+            kind=MarketMyOrder.Kind.SAFETY,
+            type=MarketMyOrder.Type.SELL,
+            status=MarketMyOrder.Status.FILLED
+        )
+
+        for so in safety_orders:
+            orders_sell_count += 1
             total_amount += so.amount
             sum_prices += so.price
             if so.commission:
