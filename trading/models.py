@@ -445,13 +445,13 @@ class MarketBot(models.Model):
     average_safety_step = models.DecimalField('Множитель шага страховочных ордеров',
                                               max_digits=5, decimal_places=2, default=1)
 
-    class Strategy(models.TextChoices):
-        """Стратегия"""
-
-        LONG = 'long', 'Long (на росте)'
-        SHORT = 'short', 'Short (на падении)'
-
-    strategy = models.CharField('Стратегия', max_length=5, choices=Strategy.choices, default=Strategy.LONG)
+    # class Strategy(models.TextChoices):
+    #     """Стратегия"""
+    #
+    #     LONG = 'long', 'Long (на росте)'
+    #     SHORT = 'short', 'Short (на падении)'
+    #
+    # strategy = models.CharField('Стратегия', max_length=5, choices=Strategy.choices, default=Strategy.LONG)
 
     def __str__(self):
         return '{}'.format(self.name)
