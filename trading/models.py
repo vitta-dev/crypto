@@ -785,14 +785,16 @@ class MarketMyOrder(models.Model):
         return self.get_hash() == str_hash
 
     def panic_sell(self):
-
+        """Продажа по кнопке"""
         message = ''
 
         from trading.bots.strategy_average import BotAverage
         bot = self.bot
+
         market = bot.markets.first()
         # print('market', market)
         tb = BotAverage(bot, market)
+        tb.get_tickers()
         if not settings.DEBUG:
             sell_order = tb.create_sell_by_current_price(self)
             if sell_order:
