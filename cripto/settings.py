@@ -186,6 +186,8 @@ RAVEN_CONFIG = {
 BINANCE_API_KEY = ''
 BINANCE_SECRET_KEY = ''
 
+BINANCE_COMMISSION_BNB = '0.075'
+
 try:
     from .settings_local import *
 except ImportError:

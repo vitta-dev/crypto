@@ -16,6 +16,8 @@ except ImportError:
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
+commission = Decimal(settings.BINANCE_COMMISSION_BNB)
+
 
 class Exchange(models.Model):
     class Meta:
@@ -855,10 +857,10 @@ class MarketMyOrder(models.Model):
                 # self.price = Decimal(res_ticker_data['Bid'])
                 # self.spent = self.price * self.amount
                 # if self.type == self.Type.BUY:
-                #     self.commission = self.price * self.amount / 100 * Decimal(0.25)
+                #     self.commission = self.price * self.amount / 100 * commission
                 #     self.spent = self.price * self.amount + self.commission
                 # else:
-                #     self.commission = self.price * self.amount / 100 * Decimal(0.25)
+                #     self.commission = self.price * self.amount / 100 * commission
                 #     self.spent = self.price * self.amount
 
                 if order_info:
@@ -897,7 +899,7 @@ class MarketMyOrder(models.Model):
             total_spent = from_order.spent + from_order.commission
         else:
             total_spent = from_order.price * from_order.amount + (
-                    from_order.price * from_order.amount / 100 * Decimal(0.25)
+                    from_order.price * from_order.amount / 100 * commission
             )
 
         # TODO: сделать учет не полностью выкупленных ордеров
@@ -916,7 +918,7 @@ class MarketMyOrder(models.Model):
             if so.commission:
                 total_spent += so.spent + so.commission  # 0.075
             else:
-                total_spent += so.price * so.amount + so.price * so.amount / 100 * Decimal(0.25)
+                total_spent += so.price * so.amount + so.price * so.amount / 100 * commission
 
         average_price = total_spent / total_amount
 
@@ -927,10 +929,7 @@ class MarketMyOrder(models.Model):
         orders_sell_count = 1
 
         # получаем данные по основному ордеру
-        if self.from_order:
-            from_order = self.from_order
-        else:
-            from_order = self
+        from_order = self.from_order if self.from_order else self
 
         total_amount = from_order.amount
         sum_prices = from_order.price
@@ -939,7 +938,7 @@ class MarketMyOrder(models.Model):
             total_spent = from_order.spent + from_order.commission
         else:
             total_spent = from_order.price * from_order.amount + (
-                    from_order.price * from_order.amount / 100 * Decimal(0.25)
+                    from_order.price * from_order.amount / 100 * commission
             )
 
         # TODO: сделать учет не полностью выкупленных ордеров
@@ -958,7 +957,7 @@ class MarketMyOrder(models.Model):
             if so.commission:
                 total_spent += so.spent + so.commission  # 0.075
             else:
-                total_spent += so.price * so.amount + so.price * so.amount / 100 * Decimal(0.25)
+                total_spent += so.price * so.amount + so.price * so.amount / 100 * commission
 
         average_price = total_spent / total_amount
 
@@ -1026,13 +1025,13 @@ class MarketMyOrder(models.Model):
                 if o.commission:
                     spent_sell = o.spent - o.commission
                 else:
-                    spent_sell = o.price * o.amount + o.price * o.amount / 100 * Decimal(0.25)
+                    spent_sell = o.price * o.amount + o.price * o.amount / 100 * commission
         else:
             if self.commission:
                 spent_sell = self.spent - self.commission
                 # spent_buy = self.from_order.spent + self.from_order.commission
             else:
-                spent_sell = self.price * self.amount + self.price * self.amount / 100 * Decimal(0.25)
+                spent_sell = self.price * self.amount + self.price * self.amount / 100 * commission
                 # spent_buy = self.from_order.price * self.amount + self.from_order.price * self.from_order.amount / 100 * Decimal(0.5)
         print('spent_buy, spent_sell', spent_buy, spent_sell)
         return spent_buy, spent_sell
@@ -1045,7 +1044,7 @@ class MarketMyOrder(models.Model):
         if order.commission:
             spent = order.spent + order.commission
         else:
-            spent = order.price * order.amount + order.price * order.amount / 100 * Decimal(0.25)
+            spent = order.price * order.amount + order.price * order.amount / 100 * commission
         print('spent', spent)
         safety_orders = MarketMyOrder.objects.filter(from_order=order,
                                                      kind=MarketMyOrder.Kind.SAFETY,
@@ -1056,7 +1055,7 @@ class MarketMyOrder(models.Model):
             if self.commission:
                 spent += so.spent + so.commission
             else:
-                spent += so.price * so.amount + so.price * so.amount / 100 * Decimal(0.25)
+                spent += so.price * so.amount + so.price * so.amount / 100 * commission
         print('spent*', spent)
         return spent
 

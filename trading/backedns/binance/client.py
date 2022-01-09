@@ -8,7 +8,7 @@ import requests
 import json
 from bittrex import Bittrex, TICKINTERVAL_FIVEMIN, TICKINTERVAL_THIRTYMIN
 from django.utils import timezone
-from trading.backedns.binance.config import API_KEY, SECRET_KEY
+from trading.backedns.binance.config import API_KEY, SECRET_KEY, COMMISSION
 from binance.client import Client
 from trading.lib import print_debug
 from trading.models import Currency, Market, MarketSettings, Exchange
@@ -25,6 +25,8 @@ class ApiBinance(object):
 
     code = 'binance'
     exchange = None
+
+    commission = Decimal(COMMISSION)
 
     convert_ticker = {
         "Bid": 'bidPrice',

@@ -287,7 +287,7 @@ class BotAverageFixed(BotBase):
             status=MarketMyOrder.Status.OPEN
         )
 
-        for order in sell_orders:
+        for order in buy_orders:
             self.cancel_order(order, cancel_type=MarketMyOrder.CancelStatus.SAFETY)
 
     def next_safety_price(self, last_order):
@@ -312,7 +312,9 @@ class BotAverageFixed(BotBase):
 
     def get_profit_price(self, price):
         """Добавляем профит к цене с учетом комиссии"""
-        return self.add_stock_fee(price + price * self.bot.markup / 100)
+        profit = self.add_stock_fee(price + price * self.bot.markup / 100)
+        print('----------', profit)
+        return profit
 
     def create_fix_sell(self, from_order: MarketMyOrder) -> Union[MarketMyOrder, bool]:
         """Проверяем есть ли ордер на продажу"""
