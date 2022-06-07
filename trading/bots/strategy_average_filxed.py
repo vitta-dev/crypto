@@ -6,13 +6,13 @@ from trading.models import MarketMyOrder, MarketOrderLog
 from trading.lib import print_debug
 
 
-class BotAverage(BotBase):
+class BotAverageFixed(BotBase):
     total_safety_orders = 0
     active_orders = 0
     open_status = [MarketMyOrder.Status.OPEN, MarketMyOrder.Status.PART_FILLED]
 
     def check_order(self, order, count_active_orders=0):
-        print_debug('BotAverage check_order')
+        print_debug('BotAverageFixed check_order')
         # обновляем информацию из базы, для исключения коллизий со статусами
         order.refresh_from_db()
         # TODO: сделать проверку ордеров
@@ -93,8 +93,76 @@ class BotAverage(BotBase):
 
         return count_active_orders
 
+    def check_order_short(self, order, count_active_orders=0):
+        """Проверка ордера при short стратегии"""
+        print_debug('BotAverageFixed check_order short')
+        # обновляем информацию из базы, для исключения коллизий со статусами
+        order.refresh_from_db()
+        # TODO: сделать проверку ордеров
+        print_debug("Check orders {} - {} {} [{}]".format(order.id, order.get_uuid(), order.type, order.status))
+        if order.uuid:
+            if order.status in [MarketMyOrder.Status.OPEN, MarketMyOrder.Status.PART_FILLED]:
+                order = self.check_order_status(order)
+
+            self.get_tickers()
+
+            if order.type == MarketMyOrder.Type.BUY:
+
+                # если выполнился ордер на покупку отменяем все страховочные ордера
+                if order.status == MarketMyOrder.Status.FILLED:
+                    self.cancel_safety_orders(order.from_order)
+
+                    # фиксируем историю баланса
+                    hb = self.fix_current_balance()
+                    hb.order = order.from_order
+                    hb.save()
+                # else:
+                    # отключаем отмену ордера на продажу, продажа должна отменяться только
+                    # в случае покупкпи страховочного ордера и выставить сразу новый ордер на продажу
+                    # # если ордер на продажу проверяем stop loss
+                    # if self.bot.is_trailing_cost:  # проверяем trailing cost
+                    #     order = self.check_trailing_resell(order)
+                    # else:
+                    #     self.check_stop_loss_sell(order)
+                    #
+                    # # TODO: сделать проверку на отмену ордера на продажу при необходимости
+
+            if order.type == MarketMyOrder.Type.SELL:
+                print_debug('---------- CHECK BUY --------')
+                if (order.status == MarketMyOrder.Status.FILLED and not order.is_close
+                        and order.kind == MarketMyOrder.Kind.MAIN):
+
+                    # if not self.check_create_fix_order(order):
+                    # проверяем страховочные ордера
+                    self.check_safety_orders(order)
+
+                    # если ордер на покупку был выполнен проверяем рынок и создаем ордер на продажу,
+                    # для фиксации прибыли как только цена будет на нужном уровне
+                    self.create_fix_sell(order)
+
+                # если выполнился страховочный ордер на покупку, отменяем продажу
+                # и выставляем новый ордер на продажу с учетом изменившейся цены с профитом
+                if order.kind == MarketMyOrder.Kind.SAFETY and order.status == MarketMyOrder.Status.FILLED:
+                    self.cancel_sell_order(order.from_order)
+                    self.create_fix_sell(order.from_order)
+
+                if order.status in [MarketMyOrder.Status.OPEN]:
+                    # Если buy не был исполнен, и прошло достаточно времени для отмены ордера,
+                    # отменяем
+                    if self.check_cancel_order(order):
+                        # print_debug('Пора отменять ордер %s' % order)
+                        print_debug('cancel order')
+                        market_name = order.market.get_market_name(order.bot.exchange.code)
+                        cancel_res = self.api.cancel(order.uuid, market_name=market_name, is_test=self.is_test)
+                        print_debug(cancel_res)
+                        if cancel_res:
+                            order.cancel_order()
+
+        return count_active_orders
+
     def check_safety_orders(self, order):
         """проверяем страховочные ордера"""
+
         print_debug('** check_safety_orders')
         self.total_safety_orders = MarketMyOrder.objects.filter(
             from_order=order, kind=MarketMyOrder.Kind.SAFETY
@@ -125,8 +193,9 @@ class BotAverage(BotBase):
             status=MarketMyOrder.Status.CANCELED
         ).count()
 
-        self.active_orders = MarketMyOrder.objects.filter(from_order=order, kind=MarketMyOrder.Kind.SAFETY,
-                                                          status__in=self.open_status).count()
+        self.active_orders = MarketMyOrder.objects.filter(
+            from_order=order, kind=MarketMyOrder.Kind.SAFETY, status__in=self.open_status
+        ).count()
 
         print('if ', self.active_orders, ' < ', self.bot.average_safety_orders_active_count,
               ' and ', self.total_safety_orders, ' < ', self.bot.average_safety_orders_max_count)
@@ -151,7 +220,7 @@ class BotAverage(BotBase):
         return last_order
 
     def create_safety_orders(self, order):
-        # создаем страховочные ордера
+        """создаем страховочные ордера"""
         print('def create_safety_orders')
         last_order = self.get_last_safety_order(order)
 
@@ -164,18 +233,18 @@ class BotAverage(BotBase):
                 price, amount = self.next_safety_price(last_order)
                 print('price, amount', price, amount)
                 # проверка доступного баланса
-                market_currency = self.market.market_currency.name
-                base_currency = self.market.base_currency.name
-                print('market_currency', market_currency)
-                print('base_currency', base_currency)
-                available_balance_market = self.api.get_currency_balance(market_currency)
-                available_balance_market1 = self.api.get_currency_balance(base_currency)
+                market_currency = self.market.market_currency.name  # BNB
+                base_currency = self.market.base_currency.name      # BTC
+                print('market_currency BNB', market_currency)
+                print('base_currency BTC', base_currency)
+                available_balance_market = self.api.get_currency_balance(market_currency)   # BNB
+                available_balance_market1 = self.api.get_currency_balance(base_currency)    # BTC
                 print('amount < available_balance_market', amount, available_balance_market)
                 print('available_balance_market1 ', available_balance_market1)
                 print('amount * price', amount * price)
                 print('amount / price', amount / price)
                 # if amount < available_balance_market:
-                if amount * price > available_balance_market1:
+                if amount * price >= available_balance_market1:
                     is_safety = False
                     print_debug('Not enough money for safety')
                     # TODO: сделать оповещение о нехватке баланса
@@ -191,7 +260,7 @@ class BotAverage(BotBase):
                 print_debug('is_safety = False')
 
     def cancel_safety_orders(self, from_order):
-        """Отменяем страховочные ордера"""
+        """отменяем страховочные ордера"""
         safety_orders = MarketMyOrder.objects.filter(from_order=from_order,
                                                      kind=MarketMyOrder.Kind.SAFETY,
                                                      status=MarketMyOrder.Status.OPEN)
@@ -200,15 +269,30 @@ class BotAverage(BotBase):
             self.cancel_order(order)
 
     def cancel_sell_order(self, from_order):
-        """Отменяем ордер на продажу"""
-        sell_orders = MarketMyOrder.objects.filter(from_order=from_order,
-                                                   type=MarketMyOrder.Type.SELL,
-                                                   status=MarketMyOrder.Status.OPEN)
+        """отменяем ордер на продажу"""
+        sell_orders = MarketMyOrder.objects.filter(
+            from_order=from_order,
+            type=MarketMyOrder.Type.SELL,
+            status=MarketMyOrder.Status.OPEN
+        )
 
         for order in sell_orders:
             self.cancel_order(order, cancel_type=MarketMyOrder.CancelStatus.SAFETY)
 
+    def cancel_buy_order(self, from_order):
+        """отменяем ордер на покупку"""
+        buy_orders = MarketMyOrder.objects.filter(
+            from_order=from_order,
+            type=MarketMyOrder.Type.BUY,
+            status=MarketMyOrder.Status.OPEN
+        )
+
+        for order in buy_orders:
+            self.cancel_order(order, cancel_type=MarketMyOrder.CancelStatus.SAFETY)
+
     def next_safety_price(self, last_order):
+        """Получить цену и количество монет для следующего страховочного ордера"""
+
         print_debug('next_safety_price')
         print_debug(last_order.price)
         print_debug(last_order.amount)
@@ -228,7 +312,9 @@ class BotAverage(BotBase):
 
     def get_profit_price(self, price):
         """Добавляем профит к цене с учетом комиссии"""
-        return self.add_stock_fee(price + price * self.bot.markup / 100)
+        profit = self.add_stock_fee(price + price * self.bot.markup / 100)
+        print('----------', profit)
+        return profit
 
     def create_fix_sell(self, from_order: MarketMyOrder) -> Union[MarketMyOrder, bool]:
         """Проверяем есть ли ордер на продажу"""
@@ -260,23 +346,35 @@ class BotAverage(BotBase):
 
         return new_sell_order
 
-    def create_sell_by_current_price(self, from_order: MarketMyOrder) -> Optional[MarketMyOrder]:
-        """Создаем ордер на продажу по текущему курсу, без учета профита"""
+    def create_fix_buy(self, from_order: MarketMyOrder) -> Union[MarketMyOrder, bool]:
+        """Проверяем есть ли ордер на покупку"""
 
-        # отменяем страховочные ордера
-        self.cancel_safety_orders(from_order)
+        new_buy_order = False
 
-        # отменяем ордер на продажу
-        self.cancel_sell_order(from_order)
+        # получаем сумму и среднюю цену с учетом прибыли
+        total_amount, average_price = from_order.get_amount_for_buy()
+        min_profit_price = self.get_profit_price(average_price)
 
-        # выставляем ордер на продажу по текущему курсу
-        total_amount, average_price = from_order.get_amount_for_sell_new()
-        rate = self.get_price_for_sell()
-        order_spent = Decimal(total_amount * rate)
+        try:
+            # если ордер на продажу есть, сверяем выставленную сумму и прайс
+            sell_order = MarketMyOrder.objects.get(from_order=from_order,
+                                                   type=MarketMyOrder.Type.SELL,
+                                                   status=MarketMyOrder.Status.OPEN)
 
-        sell_order = self.place_order(total_amount, rate, order_spent, from_order)
+            # если сумма не совпадает отменяем ордер на продажу и выставляем новый
+            if sell_order and (sell_order.amount != total_amount or sell_order.price != min_profit_price):
+                self.cancel_order(sell_order, MarketMyOrder.CancelStatus.SAFETY)
+                new_buy_order = self.create_fix_order(from_order)
 
-        return sell_order
+        except MarketMyOrder.DoesNotExist:
+            sell_orders = MarketMyOrder.objects.filter(
+                from_order=from_order, type=MarketMyOrder.Type.SELL
+            ).exclude(status=MarketMyOrder.Status.CANCELED)
+            if sell_orders.count() == 0:
+                # выставляем ордер на продажу
+                new_buy_order = self.create_fix_order(from_order)
+
+        return new_buy_order
 
     def create_fix_order(self,
                          order: MarketMyOrder,

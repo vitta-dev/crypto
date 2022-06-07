@@ -2,7 +2,7 @@
 from decimal import *
 
 from django.contrib import admin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms.models import BaseInlineFormSet
 from django.utils.html import format_html
 
@@ -35,7 +35,7 @@ class ExchangeCurrencyStatisticAdmin(admin.ModelAdmin):
 
         return total
 
-    total.short_description = u'Total'
+    total.short_description = 'Total'
     total.allow_tags = True
 
 
@@ -76,11 +76,11 @@ class MarketSettingsInline(admin.TabularInline):
         :return:
         """
         # return '<div style="width: 500px;"><div class="col-md-12"><pre>{}</pre></div></div>'.format(obj.settings)
-        return '<pre> {} <br></pre>'.format(obj.settings)
+        return format_html('<pre> {} <br></pre>'.format(obj.settings))
         # return '<code>{}</code>'.format(obj.settings)
         # return '{}'.format(obj.settings)
 
-    settings_info.short_description = u'settings'
+    settings_info.short_description = 'settings'
     settings_info.allow_tags = True
 
 
@@ -138,9 +138,9 @@ class MarketOrderLogInline(admin.TabularInline):
                 except InvalidOperation:
                     str_format += format_html('{}: {}<br>', key, val)
 
-        return str_format
+        return format_html(str_format)
 
-    tickers.short_description = u'Ticker data'
+    tickers.short_description = 'Ticker data'
     tickers.allow_tags = True
 
     def bot_data_display(self, obj):
@@ -158,9 +158,9 @@ class MarketOrderLogInline(admin.TabularInline):
                 except InvalidOperation:
                     str_format += format_html('{}: {}<br>', key, val)
 
-        return str_format
+        return format_html(str_format)
 
-    bot_data_display.short_description = u'Bot data'
+    bot_data_display.short_description = 'Bot data'
     bot_data_display.allow_tags = True
 
 
@@ -184,7 +184,7 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
             'fields': (('created_at', 'filled_at', 'cancelled_at'), )
         }),
         (None, {
-            'fields': (('price', 'amount', 'spent', 'commission', 'profit', ),
+            'fields': (('price', 'amount', 'spent', 'commission', ),
                        ('tickers', 'order_info', ), )
         }),
 
@@ -238,10 +238,10 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
         :return:
         """
 
-        str_format = u'<a href="{}" target="_blank">{}</a>'
-        return format_html(str_format, reverse('chart-market-bot', args=(obj.market.name, obj.bot.name)), obj.market.name)
+        str_format = '<a href="{}" target="_blank">{}</a>'
+        return format_html(str_format, reverse('trading:chart-market-bot', args=(obj.market.name, obj.bot.name)), obj.market.name)
 
-    charts.short_description = u'Пара'
+    charts.short_description = 'Пара'
     charts.allow_tags = True
 
     def tickers(self, obj):
@@ -259,9 +259,9 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
                 except InvalidOperation:
                     str_format += format_html('{}: {}<br>', key, val)
 
-        return str_format
+        return format_html(str_format)
 
-    tickers.short_description = u'Ticker data'
+    tickers.short_description = 'Ticker data'
     tickers.allow_tags = True
 
     def order_info(self, obj):
@@ -284,9 +284,9 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
                 else:
                     str_format += format_html('{}: None<br>', key,)
 
-        return str_format
+        return format_html(str_format)
 
-    order_info.short_description = u'Get Order Result'
+    order_info.short_description = 'Get Order Result'
     order_info.allow_tags = True
 
     def max_price(self, obj):
@@ -313,7 +313,7 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
                     return format_html('{} - {}%', "%0.8f" % max_price, "%0.8f" % per)
         return '--'
 
-    max_price.short_description = u'Max Price'
+    max_price.short_description = 'Max Price'
     max_price.allow_tags = True
 
     def wait_price(self, obj):
@@ -348,9 +348,9 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
             str_format += '<br>---------<br>'
             str_format += '<br>trailing_price: {}'.format("%0.8f" % market_rank.trailing_price)
 
-        return str_format
+        return format_html(str_format)
 
-    wait_price.short_description = u'Wait Price'
+    wait_price.short_description = 'Wait Price'
     wait_price.allow_tags = True
 
     def current_data(self, obj):
@@ -370,9 +370,9 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
                 except InvalidOperation:
                     str_format += format_html('{}: {}<br>', key, "%0.8f" % val)
 
-        return str_format
+        return format_html(str_format)
 
-    current_data.short_description = u'Current Data'
+    current_data.short_description = 'Current Data'
     current_data.allow_tags = True
 
     def profit(self, obj):
@@ -405,7 +405,7 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
 
         return str_format
 
-    profit.short_description = u'Profit'
+    profit.short_description = 'Profit'
     profit.allow_tags = True
 
 
@@ -434,10 +434,13 @@ class MarketBotAdmin(admin.ModelAdmin):
     #           ('is_rsi', ),
     #           ('is_macd', ),
     #           'tick_intervals']
-
+    readonly_fields = ['block_panic_sell_at']
     fieldsets = (
         (None, {
             'fields': ('name', 'exchange', 'is_test', 'is_ha')
+        }),
+        ('Panic Sell', {
+            'fields': (('is_block_panic_sell', 'block_panic_sell_at'), )
         }),
         (None, {
             'fields': (('max_spend', 'markup', 'order_life_time',), )
@@ -523,10 +526,10 @@ class MarketBotAdmin(admin.ModelAdmin):
         :return:
         """
 
-        str_format = u'<a href="{}" target="_blank">test</a>'
-        return format_html(str_format, reverse('test-bot', args=(obj.name, )))
+        str_format = '<a href="{}" target="_blank">test</a>'
+        return format_html(str_format, reverse('trading:test-bot', args=(obj.name, )))
 
-    test_bot.short_description = u'Тестирование'
+    test_bot.short_description = 'Тестирование'
     test_bot.allow_tags = True
 
     def stat_bot(self, obj):
@@ -536,10 +539,10 @@ class MarketBotAdmin(admin.ModelAdmin):
         :return:
         """
 
-        str_format = u'<a href="{}" target="_blank"><i class="fa fa-table"></i></a>'
-        return format_html(str_format, reverse('stats-bot', args=(obj.name, )))
+        str_format = '<a href="{}" target="_blank"><i class="fa fa-table"></i></a>'
+        return format_html(str_format, reverse('trading:stats-bot', args=(obj.name, )))
 
-    stat_bot.short_description = u'Статистика'
+    stat_bot.short_description = 'Статистика'
     stat_bot.allow_tags = True
 
 
@@ -556,11 +559,11 @@ class BotTestOrderAdmin(admin.ModelAdmin):
         :return:
         """
 
-        str_format = u'<a href="{}" target="_blank">{}</a>'
-        return format_html(str_format, reverse('test-bot-market', args=(obj.bot.name, obj.market.name)),
+        str_format = '<a href="{}" target="_blank">{}</a>'
+        return format_html(str_format, reverse('trading:test-bot-market', args=(obj.bot.name, obj.market.name)),
                            obj.market.name)
 
-    charts.short_description = u'Пара'
+    charts.short_description = 'Пара'
     charts.allow_tags = True
 
     def tickers(self, obj):
@@ -577,7 +580,7 @@ class BotTestOrderAdmin(admin.ModelAdmin):
 
         return str_format
 
-    tickers.short_description = u'Ticker data'
+    tickers.short_description = 'Ticker data'
     tickers.allow_tags = True
 
 

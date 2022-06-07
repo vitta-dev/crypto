@@ -1,21 +1,16 @@
 # -*- coding:utf-8 -*-
-import math
 from decimal import *
 
-import numpy
-import talib
-from django.conf import settings
+from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 
-from trading.config import TICKINTERVAL_FIVEMIN, TICKINTERVAL_FIFTEENMIN
-from trading.filters import MACDFilter
-from trading.models import Market, MarketMyOrder, MarketBot, BotTestOrder, BotStat
-from trading.utils import get_chart_data, convert_ticker, get_heikin_ashi, TechnicalAnalysis
-from trading.backedns.bittrex.client import ApiBittrex
-from trading.backedns.binance.client import ApiBinance
 from statistic.forms import OrderFilter, paginate
+from trading.backedns.binance.client import ApiBinance
+from trading.backedns.bittrex.client import ApiBittrex
+from trading.models import Market, BotStat, MarketMyOrder, MarketBot
 
 
 @staff_member_required
@@ -31,10 +26,14 @@ def index(request, exchange_name='binance'):
         exchange = 'Bittrex'
         tpl = 'statistic/index.html'
         balances = api.get_balances()
+        info = {}
     else:
         api = ApiBinance()
         exchange = 'Binance'
         tpl = 'statistic/index_binance.html'
+        bot = MarketBot.objects.get(name='averaged_price')
+        info = bot.get_max_sum_for_orders
+
         balances_all = api.get_balances()
         balances = [x for x in balances_all if x['free'] != '0.00000000' or x['locked'] != '0.00000000']
 
@@ -56,7 +55,8 @@ def index(request, exchange_name='binance'):
         'balances': balances,
         'orders': orders,
         'exchange': exchange,
-        'total': total
+        'total': total,
+        'info': info,
     }
 
     return render(request, tpl, context)
@@ -65,6 +65,7 @@ def index(request, exchange_name='binance'):
 @staff_member_required
 def orders(request, exchange_name='binance', market_name='BTH-ETH'):
     """Список ордеров на бирже"""
+    print('===================== orderss')
     base_tpl = 'admin/base.html'
     market = get_object_or_404(Market, name=market_name)
 
@@ -134,3 +135,38 @@ def list_orders(request):
     }
 
     return render(request, 'statistic/order_list.html', context)
+
+
+@staff_member_required
+def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
+    """Детальная информация о заказе"""
+
+    # TODO: вынести определение базового шаблона в декоратор
+    base_tpl = 'admin/base.html'
+
+    order = get_object_or_404(MarketMyOrder, id=order_id)
+
+    context = {
+        'base_tpl': base_tpl,
+        'order': order,
+    }
+
+    return render(request, 'statistic/order_detail.html', context)
+
+
+@staff_member_required
+def order_panic_sell(request, order_id):
+    """Создаем продажу по текущему курсу"""
+
+    order = get_object_or_404(MarketMyOrder, id=order_id)
+    uuid = request.POST.get('uuid')
+
+    if order.is_check_hash(uuid):
+
+        message = order.panic_sell()
+        messages.success(request, message)
+
+    else:
+        messages.error(request, 'Ошибочный uuid')
+
+    return redirect('statistic:order-detail', order.id)

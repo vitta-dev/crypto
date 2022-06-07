@@ -189,7 +189,8 @@ def get_price_for_buy(ticker_data):
     return rate
 
 
-def get_price_for_sell(ticker_data):
+def get_price_for_sell(ticker_data) -> Decimal:
+    """Возвращает текущий курс на основе данных с биржи"""
     # return ticker_data['Ask'] - satoshi_1
 
     rate = Decimal(ticker_data['Ask'])

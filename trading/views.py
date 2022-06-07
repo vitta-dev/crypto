@@ -42,9 +42,9 @@ def charts(request, market_name=None, bot_name=None):
     # group_to_periods = ["mm", "5mm", "30mm"]
     market_name = market.get_market_name(bot.exchange.code)
     tick_intervals = bot.get_tick_intervals()
-    tick_interval = tick_intervals[0]
+    tick_interval = tick_intervals[0] if tick_intervals else ''
     charts_data = get_chart_data(market_name, api, tick_interval)
-
+    print(charts_data)
     group_to_periods = ["mm", "5mm"]
     # charts_data = get_chart_data(market, TICKINTERVAL_HOUR)
     # group_to_periods = ["mm", "5mm", "1hh"]

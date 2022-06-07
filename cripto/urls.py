@@ -16,8 +16,9 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf import settings
+from django.urls import path
 
-import statistic.urls as stat_url
+# import statistic.urls as stat_url
 
 # urlpatterns = [
 #     url('^e5c9247a98c58dda4e6749fe081fb79a/', include([
@@ -31,11 +32,15 @@ import statistic.urls as stat_url
 # ]
 
 urlpatterns = [
-    url(r'^e5c9247a98c58dda4e6749fe081fb79a/', admin.site.urls),
-    url(r'^e5c9247a98c58dda4e6749fe081fb79a/trade/', include('trading.urls')),
-    # url('^e5c9247a98c58dda4e6749fe081fb79a/stat/$', include('statistic.urls'), name='stat'),
-    url('^e5c9247a98c58dda4e6749fe081fb79a/stat/', include(stat_url.urlpatterns, namespace='stat')),
-    url('^telegram/', include('test_telegram.urls', namespace='telegram')),
+    # path('e5c9247a98c58dda4e6749fe081fb79a/', admin.site.urls),
+    # path('e5c9247a98c58dda4e6749fe081fb79a/statistic/', include(('statistic.urls', 'statistic'), namespace='statistic')),
+    path('e5c9247a98c58dda4e6749fe081fb79a/tr/', include(('trading.urls', 'trading'), namespace='trading')),
+    path('e5c9247a98c58dda4e6749fe081fb79a/st/', include(('statistic.urls', 'statistic'), namespace='statistic')),
+    # url('^e5c9247a98c58dda4e6749fe081fb79a/stat/', include(('statistic.urls', 'statistic'), namespace='stat')),
+    # url('^e5c9247a98c58dda4e6749fe081fb79a/stat/', include(('statistic.urls', 'statistic'), namespace='stat')),
+    # url(r'^e5c9247a98c58dda4e6749fe081fb79a/stat/', include(('statistic.urls', 'statistic'), namespace='statistic')),
+    # path('telegram/', include(('test_telegram.urls', 'telegram'), namespace='telegram')),
+    path('e5c9247a98c58dda4e6749fe081fb79a/', admin.site.urls),
 ]
 
 if settings.DEBUG:

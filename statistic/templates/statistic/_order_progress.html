@@ -1,0 +1,59 @@
+{% with wait_price=order.get_sell_price current_price=order.get_current_price %}
+    <div class="col-xs-6 no-padding text-center">
+        <div class="padding-5">
+            <small class="">CurrentPrice
+                <br>
+                <strong>{{ current_price|floatformat:8 }}</strong></small>
+        </div>
+    </div>
+    <div class="col-xs-6 no-padding text-center">
+        <div class="border-right border-dark padding-5">
+            <small class="">WaitPrice
+                <br>
+                <strong>{{ wait_price.price|floatformat:8 }}</strong></small>
+        </div>
+    </div>
+    {#                            {% diff_percent wait_price.price current_price True as percent %}#}
+    {% progress_price order.get_average_price wait_price.price current_price as percent %}
+    <div class="col-xs-12">
+        {% if percent.is_increase %}
+            <span class="block padding-top-10">
+                                        <div class="progress progress-xs no-radius background-dark no-margin">
+                                            <div class="progress-bar progress-bar-purple"
+                                                 role="progressbar"
+                                                 aria-valuenow="{{ percent.value }}" aria-valuemin="0"
+                                                 aria-valuemax="100"
+                                                 style="width: {{ percent.value }}%;">
+                                                <span class="sr-only"> {{ percent.value }}% </span>
+                                            </div>
+                                        </div>
+                                    </span>
+        {% else %}
+            <div class="col-xs-6 progress-decrease">
+                                        <span class="block padding-top-10">
+                                            <div class="progress progress-xs no-radius background-dark no-margin">
+                                                <div class="progress-bar progress-bar-danger pull-right"
+                                                     role="progressbar"
+                                                     aria-valuenow="{{ percent.value }}" aria-valuemin="0"
+                                                     aria-valuemax="100"
+                                                     style="width: {{ percent.value }}%;">
+                                                    <span class="sr-only"> {{ percent.value }}% </span>
+                                                </div>
+                                            </div>
+                                        </span>
+            </div>
+            <div class="col-xs-6 progress-decrease">
+                                        <span class="block padding-top-10">
+                                            <div class="progress progress-xs no-radius background-dark no-margin">
+                                                <div class="progress-bar progress-bar-purple"
+                                                     role="progressbar"
+                                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                                                     style="width: 0;">
+                                                    <span class="sr-only"> 0% </span>
+                                                </div>
+                                            </div>
+                                        </span>
+            </div>
+        {% endif %}
+    </div>
+{% endwith %}

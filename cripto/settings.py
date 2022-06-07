@@ -102,6 +102,7 @@ DATABASES = {
     }
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -185,7 +186,19 @@ RAVEN_CONFIG = {
 BINANCE_API_KEY = ''
 BINANCE_SECRET_KEY = ''
 
+BINANCE_COMMISSION_BNB = '0.075'
+
 try:
     from .settings_local import *
 except ImportError:
     pass
+
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += [
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    ]
+    INTERNAL_IPS = [
+        '127.0.0.1',
+    ]

@@ -1,19 +1,28 @@
 import datetime
+import hashlib
 from decimal import *
 from typing import Tuple
 
+from django.conf import settings
+from django.core.checks import messages
 from django.db import models
 from django.utils import timezone
 from django.db.models import Q
-from django.contrib.postgres.fields import JSONField
+
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+
+commission = Decimal(settings.BINANCE_COMMISSION_BNB)
 
 
 class Exchange(models.Model):
     class Meta:
-        verbose_name = u'биржа'
-        verbose_name_plural = u'биржы'
+        verbose_name = 'биржа'
+        verbose_name_plural = 'биржы'
         db_table = 'trading_exchange'
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -31,8 +40,8 @@ class Exchange(models.Model):
 class Currency(models.Model):
     class Meta:
         db_table = 'trading_currency'
-        verbose_name = u'валюта'
-        verbose_name_plural = u'валюты'
+        verbose_name = 'валюта'
+        verbose_name_plural = 'валюты'
         ordering = ['name']
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -73,8 +82,8 @@ class Currency(models.Model):
 
 class Market(models.Model):
     class Meta:
-        verbose_name = u'пара'
-        verbose_name_plural = u'пары'
+        verbose_name = 'пара'
+        verbose_name_plural = 'пары'
         db_table = 'trading_market'
         unique_together = ['base_currency', 'market_currency']
         ordering = ['base_currency', 'market_currency']
@@ -83,9 +92,9 @@ class Market(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
 
     market_currency = models.ForeignKey(Currency, verbose_name='MarketCurrency',
-                                        related_name="market_currencies")
+                                        related_name="market_currencies", on_delete=models.CASCADE)
     base_currency = models.ForeignKey(Currency, verbose_name='BaseCurrency',
-                                      related_name="base_currencies")
+                                      related_name="base_currencies", on_delete=models.CASCADE)
 
     name = models.CharField('название', max_length=100)
     code = models.CharField('код', max_length=100, default='-')
@@ -118,8 +127,8 @@ class MarketSettings(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
-    exchange = models.ForeignKey(Exchange, default=1)
-    market = models.ForeignKey(Market, default=1, related_name='settings')
+    exchange = models.ForeignKey(Exchange, default=1, on_delete=models.CASCADE)
+    market = models.ForeignKey(Market, default=1, related_name='settings', on_delete=models.CASCADE)
 
     is_active = models.BooleanField(default=False)
 
@@ -128,15 +137,15 @@ class MarketSettings(models.Model):
 
 class MarketSummary(models.Model):
     class Meta:
-        verbose_name = u'Summary 24H'
-        verbose_name_plural = u'Summary 24H'
+        verbose_name = 'Summary 24H'
+        verbose_name_plural = 'Summary 24H'
         db_table = 'trading_market_summary'
 
     created_at = models.DateTimeField('ADDED', default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField(default=timezone.now)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
     name = models.CharField('DisplayMarketName', max_length=100, blank=True, null=True)
 
     high = models.DecimalField('24HR HIGH', max_digits=24, decimal_places=8, default=0)  # 0.01350000,
@@ -154,15 +163,15 @@ class MarketSummary(models.Model):
 
 class MarketRank(models.Model):
     class Meta:
-        verbose_name = u'Market Rank'
-        verbose_name_plural = u'Markets Rank'
+        verbose_name = 'Market Rank'
+        verbose_name_plural = 'Markets Rank'
         db_table = 'trading_market_rank'
 
     created_at = models.DateTimeField('ADDED', default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField(default=timezone.now)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
     name = models.CharField('DisplayMarketName', max_length=100, blank=True, null=True)
 
     rank = models.DecimalField('rank', max_digits=24, decimal_places=8, default=0)
@@ -175,7 +184,7 @@ class MarketOrderBook(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
 
     quantity = models.DecimalField('Quantity', max_digits=24, decimal_places=8, default=0)
     rate = models.DecimalField('rate', max_digits=24, decimal_places=8, default=0)
@@ -199,7 +208,7 @@ class MarketTrade(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField('TimeStamp')
 
-    market = models.ForeignKey(Market, verbose_name='Market')
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
 
     price = models.DecimalField('Price', max_digits=24, decimal_places=8, default=0)
     quantity = models.DecimalField('Quantity', max_digits=24, decimal_places=8, default=0)
@@ -247,7 +256,7 @@ class OpenOrders(models.Manager):
                               MarketMyOrder.Status.FILLED
                               ]
                   ),
-                )
+            )
         )
 
         return qs
@@ -277,8 +286,8 @@ class CloseOrders(models.Manager):
 
 class MarketTickInterval(models.Model):
     class Meta:
-        verbose_name = u'интервал'
-        verbose_name_plural = u'интервалы'
+        verbose_name = 'интервал'
+        verbose_name_plural = 'интервалы'
         db_table = 'trading_tick_interval'
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -301,10 +310,14 @@ class MarketBot(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
-    exchange = models.ForeignKey(Exchange, verbose_name='Биржа', default=1)
+    exchange = models.ForeignKey(Exchange, verbose_name='Биржа', default=1, on_delete=models.CASCADE)
 
     name = models.CharField('название', max_length=100, unique=True)
     is_test = models.BooleanField(default=True)
+
+    is_block_panic_sell = models.BooleanField('Бот остановлен после Panic Sell', default=False)
+    block_panic_sell_at = models.DateTimeField('Время остановки бота после Panic Sell', null=True, blank=True)
+
     is_ha = models.BooleanField('Проверять по Heikin Ashi', default=False)
 
     max_spend = models.DecimalField('Максимальная сумма покупки', max_digits=24, decimal_places=8, default=0)
@@ -324,7 +337,7 @@ class MarketBot(models.Model):
                                            help_text='процент роста после кторого фиксируем максимальную цену')
     trailing_cost_fall = models.DecimalField('% падения', max_digits=5, decimal_places=2, default=1,
                                              help_text='процент падения для фиксации прибыли')
-    # currency = models.ForeignKey(Currency, verbose_name='Валюта')
+    # currency = models.ForeignKey(Currency, verbose_name='Валюта', on_delete=models.CASCADE)
 
     tick_intervals = models.ManyToManyField(MarketTickInterval, verbose_name='Интервалы')
 
@@ -412,7 +425,7 @@ class MarketBot(models.Model):
     is_market_rank = models.BooleanField('Подбирать пары по рангу', default=False)
     max_rank_pairs = models.IntegerField('Максимальное кол-во пар', default=10)
     rank_base_currency = models.ForeignKey(Currency, verbose_name='Базовая валюта', blank=True, null=True,
-                                           limit_choices_to={'is_base': True}, )
+                                           limit_choices_to={'is_base': True}, on_delete=models.CASCADE)
 
     markets = models.ManyToManyField(Market, verbose_name='Пары', blank=True)
 
@@ -433,6 +446,14 @@ class MarketBot(models.Model):
 
     average_safety_step = models.DecimalField('Множитель шага страховочных ордеров',
                                               max_digits=5, decimal_places=2, default=1)
+
+    # class Strategy(models.TextChoices):
+    #     """Стратегия"""
+    #
+    #     LONG = 'long', 'Long (на росте)'
+    #     SHORT = 'short', 'Short (на падении)'
+    #
+    # strategy = models.CharField('Стратегия', max_length=5, choices=Strategy.choices, default=Strategy.LONG)
 
     def __str__(self):
         return '{}'.format(self.name)
@@ -549,7 +570,7 @@ class MarketBot(models.Model):
     def check_market_stop_loss(self):
         check_date = timezone.now() - datetime.timedelta(minutes=self.stop_loss_block_trade)
 
-        MarketBotRank.objects.filter(bot=self, is_block_trade=True, block_trade_at__lte=check_date)\
+        MarketBotRank.objects.filter(bot=self, is_block_trade=True, block_trade_at__lte=check_date) \
             .update(is_block_trade=False, block_trade_at=None)
 
     def get_markets(self, api):
@@ -590,7 +611,7 @@ class MarketBot(models.Model):
                 if self.rank_base_currency:
                     market_data['market__base_currency'] = self.rank_base_currency
                 bot_markets = MarketBotRank.objects.values_list('market_id', flat=True) \
-                                  .filter(**market_data).order_by('-rank')[:self.max_rank_pairs+5]
+                                  .filter(**market_data).order_by('-rank')[:self.max_rank_pairs + 5]
                 markets = Market.objects.filter(id__in=list(bot_markets))
 
         elif self.markets.all():
@@ -614,11 +635,18 @@ class MarketBot(models.Model):
             'trailing_cost_fall': float(self.trailing_cost_fall),
         }
 
+    def stop_panic(self):
+        """Останавливает работу бота"""
+
+        self.is_block_panic_sell = True
+        self.block_panic_sell_at = timezone.now()
+        self.save(update_fields=['is_block_panic_sell', 'block_panic_sell_at'])
+
 
 class MarketBotRank(models.Model):
     class Meta:
-        verbose_name = u'Market Rank'
-        verbose_name_plural = u'Markets Rank'
+        verbose_name = 'Market Rank'
+        verbose_name_plural = 'Markets Rank'
         db_table = 'trading_market_bot_rank'
         ordering = ['-rank']
 
@@ -626,8 +654,8 @@ class MarketBotRank(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField(default=timezone.now)
 
-    market = models.ForeignKey(Market, verbose_name='Market', related_name='bot_rank')
-    bot = models.ForeignKey(MarketBot, verbose_name='MarketBot', related_name='bot_rank')
+    market = models.ForeignKey(Market, verbose_name='Market', related_name='bot_rank', on_delete=models.CASCADE)
+    bot = models.ForeignKey(MarketBot, verbose_name='MarketBot', related_name='bot_rank', on_delete=models.CASCADE)
 
     rank = models.DecimalField('rank', max_digits=24, decimal_places=8, default=0)
 
@@ -668,23 +696,24 @@ class MarketMyOrder(models.Model):
     filled_at = models.DateTimeField(blank=True, null=True)
     cancelled_at = models.DateTimeField(blank=True, null=True)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
-    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True)
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
+    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True, on_delete=models.CASCADE)
 
     price = models.DecimalField('Price', max_digits=24, decimal_places=8, default=0, help_text='Цена покупки/продажи')
     amount = models.DecimalField('Amount', max_digits=24, decimal_places=8, default=0, help_text='Кол-во')
     spent = models.DecimalField('Spent', max_digits=24, decimal_places=8, default=0, help_text='Потрачено')
-    test_spent = models.DecimalField('Spent Test', max_digits=24, decimal_places=8, default=0, help_text='Потрачено test')
+    test_spent = models.DecimalField('Spent Test', max_digits=24, decimal_places=8, default=0,
+                                     help_text='Потрачено test')
     fee = models.DecimalField('Fee', max_digits=24, decimal_places=8, default=0, help_text='')
     commission = models.DecimalField('Commission', max_digits=24, decimal_places=8, default=0, help_text='Комиссия')
 
     # from_order = models.OneToOneField('self', blank=True, null=True)
-    from_order = models.ForeignKey('self', blank=True, null=True)
+    from_order = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
     is_close = models.BooleanField(default=False)
 
-    get_order_result = JSONField(blank=True, null=True)     # json.dumps(data)
+    get_order_result = JSONField(blank=True, null=True)  # json.dumps(data)
 
-    ticker_data = JSONField(blank=True, null=True)          # json.dumps(data)
+    ticker_data = JSONField(blank=True, null=True)  # json.dumps(data)
 
     is_stop_loss = models.BooleanField(default=False)
     is_trailing_stop_loss = models.BooleanField(default=False)
@@ -746,6 +775,39 @@ class MarketMyOrder(models.Model):
     def __str__(self):
         return '{}'.format(self.id)
 
+    def get_hash(self) -> str:
+        """Возвращает hash"""
+
+        str_hash = '{}{}'.format(self.id, self.uuid)
+        return hashlib.md5(str_hash.encode('utf-8')).hexdigest()
+
+    def is_check_hash(self, str_hash) -> bool:
+        """проверка совпадения Hash"""
+
+        return self.get_hash() == str_hash
+
+    def panic_sell(self):
+        """Продажа по кнопке"""
+        message = ''
+
+        from trading.bots.strategy_average import BotAverage
+        bot = self.bot
+
+        market = bot.markets.first()
+        # print('market', market)
+        tb = BotAverage(bot, market)
+        tb.get_tickers()
+        if not settings.DEBUG:
+            sell_order = tb.create_sell_by_current_price(self)
+            if sell_order:
+                message = 'Выставлен ордер на продажу. Бот остановлен.'
+                bot.stop_panic()
+        else:
+            message = 'Включен DEBUG. Бот остановлен.'
+            bot.stop_panic()
+
+        return message
+
     def get_color_marker(self):
         if self.status in [self.Status.FILLED, self.Status.PART_FILLED, self.Status.CLOSED, ]:
             if self.type == self.Type.SELL:
@@ -776,7 +838,7 @@ class MarketMyOrder(models.Model):
 
         if not self.from_order:
             # если основной ордер, закрываем страховочные ордера
-            MarketMyOrder.objects.filter(from_order=self, status=MarketMyOrder.Status.FILLED)\
+            MarketMyOrder.objects.filter(from_order=self, status=MarketMyOrder.Status.FILLED) \
                 .update(is_close=True)
 
     def create_log(self, log_type, ticker_data=None, max_price=0):
@@ -795,10 +857,10 @@ class MarketMyOrder(models.Model):
                 # self.price = Decimal(res_ticker_data['Bid'])
                 # self.spent = self.price * self.amount
                 # if self.type == self.Type.BUY:
-                #     self.commission = self.price * self.amount / 100 * Decimal(0.25)
+                #     self.commission = self.price * self.amount / 100 * commission
                 #     self.spent = self.price * self.amount + self.commission
                 # else:
-                #     self.commission = self.price * self.amount / 100 * Decimal(0.25)
+                #     self.commission = self.price * self.amount / 100 * commission
                 #     self.spent = self.price * self.amount
 
                 if order_info:
@@ -837,7 +899,7 @@ class MarketMyOrder(models.Model):
             total_spent = from_order.spent + from_order.commission
         else:
             total_spent = from_order.price * from_order.amount + (
-                    from_order.price * from_order.amount / 100 * Decimal(0.25)
+                    from_order.price * from_order.amount / 100 * commission
             )
 
         # TODO: сделать учет не полностью выкупленных ордеров
@@ -854,9 +916,48 @@ class MarketMyOrder(models.Model):
             total_amount += so.amount
             sum_prices += so.price
             if so.commission:
-                total_spent += so.spent + so.commission     # 0.075
+                total_spent += so.spent + so.commission  # 0.075
             else:
-                total_spent += so.price * so.amount + so.price * so.amount / 100 * Decimal(0.25)
+                total_spent += so.price * so.amount + so.price * so.amount / 100 * commission
+
+        average_price = total_spent / total_amount
+
+        return total_amount, average_price
+
+    def get_amount_for_buy(self) -> Tuple[Decimal, Decimal]:
+        """Расчитываем количество монет для покупки"""
+        orders_sell_count = 1
+
+        # получаем данные по основному ордеру
+        from_order = self.from_order if self.from_order else self
+
+        total_amount = from_order.amount
+        sum_prices = from_order.price
+        # total_spent = from_order.amount * from_order.price
+        if from_order.commission:
+            total_spent = from_order.spent + from_order.commission
+        else:
+            total_spent = from_order.price * from_order.amount + (
+                    from_order.price * from_order.amount / 100 * commission
+            )
+
+        # TODO: сделать учет не полностью выкупленных ордеров
+        # получаем исполненные страховочные ордера
+        safety_orders = MarketMyOrder.objects.filter(
+            from_order=from_order,
+            kind=MarketMyOrder.Kind.SAFETY,
+            type=MarketMyOrder.Type.SELL,
+            status=MarketMyOrder.Status.FILLED
+        )
+
+        for so in safety_orders:
+            orders_sell_count += 1
+            total_amount += so.amount
+            sum_prices += so.price
+            if so.commission:
+                total_spent += so.spent + so.commission  # 0.075
+            else:
+                total_spent += so.price * so.amount + so.price * so.amount / 100 * commission
 
         average_price = total_spent / total_amount
 
@@ -924,13 +1025,13 @@ class MarketMyOrder(models.Model):
                 if o.commission:
                     spent_sell = o.spent - o.commission
                 else:
-                    spent_sell = o.price * o.amount + o.price * o.amount / 100 * Decimal(0.25)
+                    spent_sell = o.price * o.amount + o.price * o.amount / 100 * commission
         else:
             if self.commission:
                 spent_sell = self.spent - self.commission
                 # spent_buy = self.from_order.spent + self.from_order.commission
             else:
-                spent_sell = self.price * self.amount + self.price * self.amount / 100 * Decimal(0.25)
+                spent_sell = self.price * self.amount + self.price * self.amount / 100 * commission
                 # spent_buy = self.from_order.price * self.amount + self.from_order.price * self.from_order.amount / 100 * Decimal(0.5)
         print('spent_buy, spent_sell', spent_buy, spent_sell)
         return spent_buy, spent_sell
@@ -943,7 +1044,7 @@ class MarketMyOrder(models.Model):
         if order.commission:
             spent = order.spent + order.commission
         else:
-            spent = order.price * order.amount + order.price * order.amount / 100 * Decimal(0.25)
+            spent = order.price * order.amount + order.price * order.amount / 100 * commission
         print('spent', spent)
         safety_orders = MarketMyOrder.objects.filter(from_order=order,
                                                      kind=MarketMyOrder.Kind.SAFETY,
@@ -954,12 +1055,12 @@ class MarketMyOrder(models.Model):
             if self.commission:
                 spent += so.spent + so.commission
             else:
-                spent += so.price * so.amount + so.price * so.amount / 100 * Decimal(0.25)
+                spent += so.price * so.amount + so.price * so.amount / 100 * commission
         print('spent*', spent)
         return spent
 
     def get_average_price(self):
-        # получаем усредненую цену
+        """Получаем усредненую цену"""
 
         amount = self.amount
         spent = self.spent
@@ -974,23 +1075,22 @@ class MarketMyOrder(models.Model):
             spent += so.spent
 
         if amount != 0:
-            return spent/amount
+            return spent / amount
 
         return 0
 
     def get_profit_percent(self):
+        """
+        100*х/у-100 - на столько процентов х больше у
+        100-100*у/х - на столько процентов у меньше х
+        """
+        spent_buy, spent_sell = self.get_spent()
+        if spent_buy != 0:
+            diff_percent = 100 * spent_sell / spent_buy - 100
+        else:
+            diff_percent = '--'
 
-            """
-            100*х/у-100 - на столько процентов х больше у
-            100-100*у/х - на столько процентов у меньше х
-            """
-            spent_buy, spent_sell = self.get_spent()
-            if spent_buy != 0:
-                diff_percent = 100 * spent_sell / spent_buy - 100
-            else:
-                diff_percent = '--'
-
-            return diff_percent
+        return diff_percent
 
     def get_min_profit(self):
         from trading.utils import add_stock_fee
@@ -1002,6 +1102,19 @@ class MarketMyOrder(models.Model):
             orders = MarketMyOrder.objects.filter(
                 from_order=self, type=MarketMyOrder.Type.SELL
             ).exclude(status=MarketMyOrder.Status.CANCELED)
+            return orders
+        return {}
+
+    def get_safety_orders(self) -> dict:
+        """Возвращает список выкупленных страховочных ордеров"""
+        if self.type == self.Type.BUY and self.kind == self.Kind.MAIN:
+            orders = MarketMyOrder.objects.filter(
+                from_order=self,
+                type=MarketMyOrder.Type.BUY,
+                kind=MarketMyOrder.Kind.SAFETY,
+            ).exclude(
+                status=MarketMyOrder.Status.CANCELED
+            )
             return orders
         return {}
 
@@ -1028,13 +1141,44 @@ class MarketMyOrder(models.Model):
                 pass
             return wp
 
-    def get_current_price(self):
+    def get_current_price(self) -> Decimal:
+        """Возвращает текущий курс"""
         market_rank = self.bot.get_market_rank(self.market)
 
         if market_rank and market_rank.ticker_data:
             print('************** market_rank', market_rank.ticker_data)
             from trading.utils import get_price_for_sell
             return get_price_for_sell(market_rank.ticker_data)
+
+    def calculation_current_profit(self) -> dict:
+        """Возвращает профит/потери при продаже по текущему курсу"""
+
+        current_price = self.get_current_price()
+        total_amount, average_price = self.get_amount_for_sell_new()
+
+        current_sell = Decimal(current_price * total_amount)
+
+        """
+            100*х/у-100 - на столько процентов х больше у
+            100-100*у/х - на столько процентов у меньше х
+        """
+
+        spent_buy, spent_sell = self.get_spent()
+
+        if current_sell != 0:
+            diff_percent = 100 * current_sell / spent_buy - 100
+        else:
+            diff_percent = '--'
+
+        diff_price = current_price - average_price
+
+        return {
+            'diff_percent': diff_percent,
+            'current_sell': current_sell,
+            'diff_price': diff_price,
+            'average_price': average_price,
+            'diff_amount': current_sell - spent_buy,
+        }
 
     def get_safety_orders_info(self) -> dict:
         """Возвращает информацию по страховочным ордерам"""
@@ -1043,7 +1187,7 @@ class MarketMyOrder(models.Model):
             'opened': {'count': 0, 'amount': 0},
         }
         if self.type == self.Type.BUY and self.kind == self.Kind.MAIN:
-            orders = MarketMyOrder.objects.filter(from_order=self, type=MarketMyOrder.Type.BUY)\
+            orders = MarketMyOrder.objects.filter(from_order=self, type=MarketMyOrder.Type.BUY) \
                 .exclude(status=MarketMyOrder.Status.CANCELED)
             for so in orders:
                 if so.status == MarketMyOrder.Status.OPEN:
@@ -1064,8 +1208,8 @@ class MarketMyOrder(models.Model):
 
 class MarketOrderLog(models.Model):
     class Meta:
-        verbose_name = u'Order Log'
-        verbose_name_plural = u'Orders Log'
+        verbose_name = 'Order Log'
+        verbose_name_plural = 'Orders Log'
         db_table = 'trading_market_order_log'
 
     class Type:
@@ -1096,7 +1240,7 @@ class MarketOrderLog(models.Model):
     created_at = models.DateTimeField('ADDED', default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
-    order = models.ForeignKey(MarketMyOrder, verbose_name='MarketBot', related_name='logs')
+    order = models.ForeignKey(MarketMyOrder, verbose_name='MarketBot', related_name='logs', on_delete=models.CASCADE)
 
     max_price = models.DecimalField('max price', max_digits=24, decimal_places=8, default=0)
     ticker_data = JSONField(blank=True, null=True)
@@ -1117,8 +1261,8 @@ class BotTestOrder(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     period = models.DateTimeField(blank=True, null=True)
 
-    market = models.ForeignKey(Market, verbose_name='Market')
-    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True)
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
+    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True, on_delete=models.CASCADE)
 
     price = models.DecimalField('Price', max_digits=24, decimal_places=8, default=0, help_text='Цена покупки/продажи')
 
@@ -1168,7 +1312,6 @@ class BotTestOrder(models.Model):
 
 
 class BotStat(models.Model):
-
     class Meta:
         db_table = 'trading_bot_stat'
         verbose_name = 'Сатистика'
@@ -1176,8 +1319,8 @@ class BotStat(models.Model):
 
     date = models.DateField()
 
-    market = models.ForeignKey(Market, verbose_name='Market')
-    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True)
+    market = models.ForeignKey(Market, verbose_name='Market', on_delete=models.CASCADE)
+    bot = models.ForeignKey(MarketBot, verbose_name='Бот', null=True, blank=True, on_delete=models.CASCADE)
 
     buy = models.IntegerField('Ордеров на покупку', default=0)
     buy_sum = models.DecimalField('Продано на сумму', max_digits=24, decimal_places=8, default=0, )
@@ -1190,7 +1333,6 @@ class BotStat(models.Model):
 
 
 class CheckMarketFilter(models.Model):
-
     class Meta:
         db_table = 'check_market_filter'
         verbose_name = 'Проверка фильтров'
@@ -1220,16 +1362,17 @@ class CheckMarketFilter(models.Model):
 
 class ExchangeCurrency(models.Model):
     class Meta:
-        verbose_name = u'валюта на бирже'
-        verbose_name_plural = u'валюты на бирже'
+        verbose_name = 'валюта на бирже'
+        verbose_name_plural = 'валюты на бирже'
         db_table = 'trading_exchange_currency'
         unique_together = ['currency', 'exchange']
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    currency = models.ForeignKey(Currency, verbose_name='Валюта', related_name="exchange_currencies")
-    exchange = models.ForeignKey(Exchange, verbose_name='Биржа', related_name="currencies")
+    currency = models.ForeignKey(Currency, verbose_name='Валюта', related_name="exchange_currencies",
+                                 on_delete=models.CASCADE)
+    exchange = models.ForeignKey(Exchange, verbose_name='Биржа', related_name="currencies", on_delete=models.CASCADE)
 
     start_amount = models.DecimalField('Начальный баланс', max_digits=24, decimal_places=8, default=0)
     free = models.DecimalField('Текущий баланс', max_digits=24, decimal_places=8, default=0)
@@ -1240,10 +1383,9 @@ class ExchangeCurrency(models.Model):
 
 
 class ExchangeCurrencyStatistic(models.Model):
-
     class Meta:
-        verbose_name = u'статистика валюты на бирже'
-        verbose_name_plural = u'статистика валют на бирже'
+        verbose_name = 'статистика валюты на бирже'
+        verbose_name_plural = 'статистика валют на бирже'
         db_table = 'trading_exchange_currency_statistic'
 
     class Operation:
@@ -1260,9 +1402,9 @@ class ExchangeCurrencyStatistic(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # exchange_currency = models.ForeignKey(ExchangeCurrency, verbose_name='Валюта')
-    currency = models.ForeignKey(Currency, verbose_name='Валюта', null=True)
-    order = models.ForeignKey(MarketMyOrder, verbose_name='Order', null=True, blank=True)
+    # exchange_currency = models.ForeignKey(ExchangeCurrency, verbose_name='Валюта', on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, verbose_name='Валюта', null=True, on_delete=models.CASCADE)
+    order = models.ForeignKey(MarketMyOrder, verbose_name='Order', null=True, blank=True, on_delete=models.CASCADE)
 
     free = models.DecimalField('Доступно', max_digits=24, decimal_places=8, default=0)
     locked = models.DecimalField('Заблокировано', max_digits=24, decimal_places=8, default=0)
@@ -1284,10 +1426,9 @@ class ExchangeCurrencyStatistic(models.Model):
 
 
 class HistoryBalance(models.Model):
-
     class Meta:
-        verbose_name = u'статистика баланса'
-        verbose_name_plural = u'статистика балансов'
+        verbose_name = 'статистика баланса'
+        verbose_name_plural = 'статистика балансов'
         db_table = 'trading_history_balance'
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1299,8 +1440,7 @@ class HistoryBalance(models.Model):
     usdt = models.DecimalField('USDT', max_digits=24, decimal_places=8, default=0)
     rate_usdt = models.DecimalField('rate USDT', max_digits=24, decimal_places=8, default=0)
 
-    order = models.ForeignKey(MarketMyOrder, null=True, blank=True)
+    order = models.ForeignKey(MarketMyOrder, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{}'.format(self.created_at)
-
