@@ -170,6 +170,7 @@ class BotBase:
 
         order_uuid = self.api.get_uuid_order(order_res)
         ext_id = self.api.get_ext_id_order(order_res)
+        spent = amount * price
 
         if order_uuid:
             order = MarketMyOrder.objects.create(uuid=order_uuid,
@@ -177,7 +178,7 @@ class BotBase:
                                                  market=self.market,
                                                  price=price,
                                                  amount=amount,
-                                                 spent=self.bot.max_spend,
+                                                 spent=spent,
                                                  bot=self.bot,
                                                  ticker_data=self.res_ticker_data,
                                                  is_test=self.is_test,
@@ -268,12 +269,13 @@ class BotBase:
                 ext_id = self.api.get_uuid_order(order_res)
                 if order_res and (order_uuid or ext_id):
                     print('if order_res and (order_uuid or ext_id):')
+                    spent = current_rate * can_buy
                     order = MarketMyOrder.objects.create(uuid=order_uuid,
                                                          ext_id=ext_id,
                                                          market=self.market,
                                                          price=current_rate,
                                                          amount=can_buy,
-                                                         spent=self.bot.max_spend,
+                                                         spent=spent,
                                                          bot=self.bot,
                                                          ticker_data=self.res_ticker_data,
                                                          is_test=self.is_test
