@@ -269,7 +269,7 @@ class BotBase:
                 ext_id = self.api.get_uuid_order(order_res)
                 if order_res and (order_uuid or ext_id):
                     print('if order_res and (order_uuid or ext_id):')
-                    spent = current_rate * can_buy
+                    spent = Decimal(current_rate) * Decimal(can_buy)
                     order = MarketMyOrder.objects.create(uuid=order_uuid,
                                                          ext_id=ext_id,
                                                          market=self.market,
