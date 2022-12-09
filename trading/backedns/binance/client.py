@@ -740,13 +740,23 @@ class ApiBinance(object):
 
         market_settings = self.get_market_info(market_name)
 
+        thick_size = 0
+        step_size = 0
+
+        for d in market_settings['filters']:
+            if 'tickSize' in d:
+                thick_size = d.get('tickSize')
+
+            if 'stepSize' in d:
+                step_size = d.get('stepSize')
+
         # цену приводим к требованиям биржи о кратности
-        price = self.adjust_to_step(price, market_settings['filters'][0]['tickSize'])
+        price = self.adjust_to_step(price, thick_size)
         price = "{price:0.{precision}f}".format(
                                 price=price, precision=market_settings['baseAssetPrecision'])
 
         # Рассчитываем кол-во, которое можно купить, и тоже приводим его к кратному значению
-        amount = self.adjust_to_step(amount, market_settings['filters'][2]['stepSize'])
+        amount = self.adjust_to_step(amount, step_size)
         amount = "{quantity:0.{precision}f}".format(
             quantity=amount, precision=market_settings['baseAssetPrecision']
         )
