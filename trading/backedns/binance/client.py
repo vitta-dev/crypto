@@ -744,10 +744,10 @@ class ApiBinance(object):
         step_size = 0
 
         for d in market_settings['filters']:
-            if 'tickSize' in d.keys():
+            if d['filterType'] == 'MARKET_LOT_SIZE':
                 thick_size = d.get('tickSize')
 
-            if 'stepSize' in d.keys():
+            if d['filterType'] == 'LOT_SIZE':
                 step_size = d.get('stepSize')
 
         # цену приводим к требованиям биржи о кратности
