@@ -744,7 +744,7 @@ class ApiBinance(object):
         step_size = 0
 
         for d in market_settings['filters']:
-            if d['filterType'] == 'MARKET_LOT_SIZE':
+            if d['filterType'] == 'PRICE_FILTER':
                 thick_size = d.get('tickSize')
 
             if d['filterType'] == 'LOT_SIZE':
