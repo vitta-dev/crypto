@@ -798,8 +798,12 @@ class BotBase:
 
         # эмуляция торгов
         # проверяем, если ордер на покупку BUY -  если наш ордер >= ASK отмечаем как исполненный
-        if order.type == MarketMyOrder.Type.BUY \
-                and 'Bid' in self.ticker_data and self.ticker_data['Bid'] and order.price >= self.ticker_data['Bid']:
+        if (
+                order.type == MarketMyOrder.Type.BUY
+                and 'Bid' in self.ticker_data
+                and self.ticker_data['Bid']
+                and order.price >= Decimal(self.ticker_data['Bid'])
+        ):
             test_action = True
 
         print(self.ticker_data['Ask'], order.price)
