@@ -73,18 +73,21 @@ class Command(BaseCommand):
             r = api.get_avg_price(symbol)
             print(r)
 
-            balances_all = api.get_balances()
-            currencies = ['BNB', 'BTC', 'USDT', 'ETH']
-            for balance in balances_all:
-                if balance['asset'] in currencies:
-                    currency = Currency.objects.get(name=balance['asset'])
-                    stat = ExchangeCurrencyStatistic.objects.create(
-                        currency=currency,
-                        free=Decimal(balance['free']),
-                        locked=Decimal(balance['locked']),
-                        operation='',
-                    )
-                    stat.set_total(api)
+            info = api.get_account()
+            print(info)
+
+            # balances_all = api.get_balances()
+            # currencies = ['BNB', 'BTC', 'USDT', 'ETH']
+            # for balance in balances_all:
+            #     if balance['asset'] in currencies:
+            #         currency = Currency.objects.get(name=balance['asset'])
+            #         stat = ExchangeCurrencyStatistic.objects.create(
+            #             currency=currency,
+            #             free=Decimal(balance['free']),
+            #             locked=Decimal(balance['locked']),
+            #             operation='',
+            #         )
+            #         stat.set_total(api)
 
 
 # bot.check_market_stop_loss()

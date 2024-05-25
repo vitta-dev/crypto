@@ -994,6 +994,10 @@ class BotBase:
         # fastperiod=8, slowperiod=17, signalperiod=9)
         # fastperiod=12, slowperiod=26, signalperiod=9)
 
+        # talib.CDLLONGLINE()
+        # talib.CDLHAMMER()
+        # talib.SMA()
+
         if is_ema:
             ema_fast = talib.EMA(numpy.asarray([charts_data[item]['close'] for item in sorted(charts_data)]),
                                  timeperiod=self.bot.ema_fastperiod)

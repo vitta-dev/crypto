@@ -188,6 +188,10 @@ BINANCE_SECRET_KEY = ''
 
 BINANCE_COMMISSION_BNB = '0.075'
 
+PROXIES = {}
+PROXY_LOGIN = ''
+PROXY_PASS = ''
+
 try:
     from .settings_local import *
 except ImportError:

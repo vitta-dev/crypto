@@ -47,6 +47,7 @@ class TechnicalAnalysis(object):
 
     @staticmethod
     def is_min_value(candle, min_value):
+        print('------------- ========= ', candle['value'])
         return True if candle['value'] > min_value else False
 
     @staticmethod

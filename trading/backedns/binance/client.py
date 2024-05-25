@@ -12,6 +12,7 @@ from trading.backedns.binance.config import API_KEY, SECRET_KEY, COMMISSION
 from binance.client import Client
 from trading.lib import print_debug
 from trading.models import Currency, Market, MarketSettings, Exchange
+from django.conf import settings
 
 
 client = Client(API_KEY, SECRET_KEY)
@@ -55,7 +56,20 @@ class ApiBinance(object):
             self.message = message
 
     def __init__(self):
-        self.api = Client(API_KEY, SECRET_KEY)
+
+        request_params = {}
+        if settings.DEBUG:
+            proxies = settings.PROXIES
+            from requests.auth import HTTPBasicAuth
+            auth_basic = HTTPBasicAuth(settings.PROXY_LOGIN, settings.PROXY_PASS)
+            request_params = {
+                'proxies': proxies,
+                'auth': auth_basic,
+            }
+
+        self.api = Client(API_KEY, SECRET_KEY, requests_params=request_params, tld='com')
+        # self.api = Client(API_KEY, SECRET_KEY, base_url='https://fapi.binance.com')
+        # self.api = Client(API_KEY, SECRET_KEY, tld='us')
         self.exchange = Exchange.objects.get(code=self.code)
 
     def get_currencies(self):
@@ -72,6 +86,22 @@ class ApiBinance(object):
         # else:
         #     return False
         raise self.Error('method not ready get_currencies')
+
+    def get_account(self):
+        print_debug('binance get_account')
+        """
+        Получить валюты
+        Return rate limits and list of symbols        
+
+        """
+
+        result = self.api.get_account()
+        # result = self.api.get_asset_balance(asset='BTC')
+        if 'success' in result and result['success']:
+            return result['result']
+        else:
+            return False
+        # raise self.Error('method not ready get_currencies')
 
     def get_markets(self):
         """

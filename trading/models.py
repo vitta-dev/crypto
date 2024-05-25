@@ -471,6 +471,20 @@ class MarketBot(models.Model):
         api = self.get_api()
         market = self.markets.first()
         # print('market', market)
+
+        data = {
+            'total_amount': 0,
+            'commission_bnb': 0,
+            'base_currency_name': market.base_currency.name,
+            'base_currency': 0,
+            'base_in_market': 0,
+            'market_currency_name': market.market_currency.name,
+            'market_currency': 0,
+            'current_rate': 0,
+        }
+        return data
+
+
         tb = BotAverage(self, market)
         tb.get_tickers()
         current_rate = tb.get_price_for_sell()
@@ -533,6 +547,7 @@ class MarketBot(models.Model):
         return data
 
     def get_api(self):
+        print('get_api', self.exchange.code)
         if self.exchange.code == 'binance':
             from trading.backedns.binance.client import ApiBinance
             api = ApiBinance()

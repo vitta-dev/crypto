@@ -13,3 +13,6 @@ telebot==0.0.4
 # python-binance==0.7.0
 python-binance==0.7.5
 sentry-sdk==1.4.3
+#requests==2.26.0
+requests==2.31.0
+
