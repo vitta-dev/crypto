@@ -512,7 +512,8 @@ class ApiBinance(object):
         :return:
         """
         print_debug('check_notional')
-        f = self.get_filter(settings, 'MIN_NOTIONAL')
+        # f = self.get_filter(settings, 'MIN_NOTIONAL')
+        f = self.get_filter(settings, 'NOTIONAL')
         min_notional = Decimal(f.get('minNotional', 0))
         quantity = Decimal(quantity)
         price = Decimal(price)
