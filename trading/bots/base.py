@@ -532,7 +532,8 @@ class BotBase:
         try:
             new_rate = new_rate.quantize(Decimal('.00000000'))
         except InvalidOperation:
-            new_rate = new_rate.quantize(Decimal('.00000'))
+            # new_rate = new_rate.quantize(Decimal('.00000'))
+            new_rate = new_rate.quantize(Decimal('.00'))
 
         return new_rate
 
