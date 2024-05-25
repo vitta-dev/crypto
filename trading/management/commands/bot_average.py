@@ -79,7 +79,7 @@ class Command(BaseCommand):
                         # создаем ордер на покупку
                         if tb.create_buy():
                             bot_active_pairs += 1
-                        raise Exception
+                        # raise Exception
 
             print('----- time.sleep(3) -----')
             time.sleep(3)
