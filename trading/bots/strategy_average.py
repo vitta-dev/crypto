@@ -209,10 +209,13 @@ class BotAverage(BotBase):
             self.cancel_order(order, cancel_type=MarketMyOrder.CancelStatus.SAFETY)
 
     def next_safety_price(self, last_order):
+        """ Высчитываем цену для страховочного ордера """
+
         print_debug('next_safety_price')
         print_debug(last_order.price)
         print_debug(last_order.amount)
-        price = last_order.price - last_order.price / 100 * self.bot.average_safety_ratio
+        # price = last_order.price - last_order.price / 100 * self.bot.average_safety_ratio
+        price = last_order.price - last_order.price / 100 * self.bot.average_safety_price_change
         # amount = last_order.amount + last_order.amount / 100 * self.bot.average_safety_step
         amount = last_order.amount + last_order.amount * self.bot.average_safety_step
         print(price, amount)
