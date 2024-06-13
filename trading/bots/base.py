@@ -920,6 +920,7 @@ class BotBase:
         is_dodge = self.bot.is_dodge
         is_hummer = self.bot.is_hummer
         is_sword = self.bot.is_sword
+        is_sword_or_hummer = self.bot.is_sword_or_hummer
         is_simple = self.bot.is_simple
         is_fat = self.bot.is_fat
 
@@ -957,6 +958,8 @@ class BotBase:
             trend_check['is_hummer'] = False
         if is_sword:
             trend_check['is_sword'] = False
+        if is_sword_or_hummer:
+            trend_check['is_sword_or_hummer'] = False
         if is_simple:
             trend_check['is_simple'] = False
         if is_fat:
@@ -1134,6 +1137,8 @@ class BotBase:
             trends['is_hummer'] = {'trend': None}
         if is_sword:
             trends['is_sword'] = {'trend': None}
+        if is_sword_or_hummer:
+            trends['is_sword_or_hummer'] = {'trend': None}
         if is_simple:
             trends['is_simple'] = {'trend': None}
         if is_fat:
@@ -1180,6 +1185,10 @@ class BotBase:
                 trends['is_hummer']['trend'] = self.ta.is_hummer(charts_data[d])
             if is_sword:
                 trends['is_sword']['trend'] = self.ta.is_sword(charts_data[d])
+            if is_sword_or_hummer:
+                trends['is_sword_or_hummer']['trend'] = (
+                        self.ta.is_sword(charts_data[d]) or self.ta.is_hummer(charts_data[d])
+                )
             if is_simple:
                 trends['is_simple']['trend'] = self.ta.is_simple(charts_data[d])
             if is_fat:
@@ -1396,6 +1405,8 @@ class BotBase:
             trend_check['is_hummer'] = True
         if is_sword and trends['is_sword']['trend']:
             trend_check['is_sword'] = True
+        if is_sword_or_hummer and trends['is_sword_or_hummer']['trend']:
+            trend_check['is_sword_or_hummer'] = True
         if is_simple and trends['is_simple']['trend']:
             trend_check['is_simple'] = True
         if is_fat and trends['is_fat']['trend']:

@@ -491,7 +491,7 @@ class MarketBotAdmin(admin.ModelAdmin):
         }),
 
         ('', {
-            'fields': ('is_green', 'is_dodge', 'is_hummer', 'is_sword', 'is_simple', 'is_fat'),
+            'fields': ('is_green', 'is_dodge', 'is_hummer', 'is_sword', 'is_sword_or_hummer', 'is_simple', 'is_fat'),
         }),
 
         ('', {
