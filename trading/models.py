@@ -364,6 +364,7 @@ class MarketBot(models.Model):
     # is_dodge_prev = models.BooleanField('Проверять по предыдущей dodge candle', default=False)
     is_hummer = models.BooleanField('Проверять по hummer candle', default=False)
     is_sword = models.BooleanField('Проверять по sword candle', default=False)
+    is_sword_or_hummer = models.BooleanField('Проверять по sword или hummer candle', default=False)
     is_simple = models.BooleanField('Проверять по simple candle', default=False)
     is_fat = models.BooleanField('Проверять по fat candle', default=False)
 
