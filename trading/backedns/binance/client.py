@@ -484,8 +484,10 @@ class ApiBinance(object):
         else:
             result = self.api.order_limit_buy(
                 symbol=market_name,
-                quantity=float(quantity),
-                price=float(rate)
+                # quantity=float(quantity),
+                quantity=quantity,
+                # price=float(rate)
+                price=rate
             )
             print('buy_limit', result)
             # time.sleep(30)
