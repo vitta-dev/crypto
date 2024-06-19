@@ -38,7 +38,7 @@ class Command(BaseCommand):
                                            'maxTrailingAboveDelta', 'minTrailingBelowDelta', 'maxTrailingBelowDelta',
                                            'bidMultiplierUp', 'bidMultiplierDown', 'askMultiplierUp',
                                            'askMultiplierDown',  'applyMinToMarket', 'maxNotional', 'applyMaxToMarket',
-                                           'maxNumOrders'):
+                                           'maxNumOrders', 'maxPosition'):
                                 update_data[key] = val
                                 if market_settings and getattr(market_settings, key) != str(val):
                                     update_flag = True
