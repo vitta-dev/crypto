@@ -34,7 +34,11 @@ class Command(BaseCommand):
                                 update_flag = True
 
                         for key, val in f.items():
-                            if key not in ('filterType', 'avgPriceMins'):
+                            if key not in ('filterType', 'avgPriceMins', 'minTrailingAboveDelta',
+                                           'maxTrailingAboveDelta', 'minTrailingBelowDelta', 'maxTrailingBelowDelta',
+                                           'bidMultiplierUp', 'bidMultiplierDown', 'askMultiplierUp',
+                                           'askMultiplierDown',  'applyMinToMarket', 'maxNotional', 'applyMaxToMarket',
+                                           'maxNumOrders'):
                                 update_data[key] = val
                                 if market_settings and getattr(market_settings, key) != str(val):
                                     update_flag = True
