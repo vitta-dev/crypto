@@ -399,6 +399,13 @@ class MarketBot(models.Model):
     stochastic_slowk_period = models.SmallIntegerField('Stochastic slowk_period', default=3)
     stochastic_slowd_period = models.SmallIntegerField('Stochastic slowd_period', default=3)
 
+    ut_sensitivity = models.SmallIntegerField('Ut bot SENSITIVITY', default=2,
+                                              help_text='коэффициент, умножающий ATR. Обеспечивает большую или '
+                                                        'меньшую чувствительность к движениям цен.')
+    ut_atr_period = models.SmallIntegerField('Ut bot ATR_PERIOD', default=7,
+                                             help_text='Средний истинный диапазон (ATR) — '
+                                                       'это индикатор волатильности рынка')
+
     bot_last_run = models.DateTimeField('Время поседнего запуска бота', null=True, blank=True)
 
     # # коэффициенты
@@ -846,6 +853,14 @@ class MarketMyOrder(models.Model):
             # self.from_order.close_order()
 
         self.save()
+
+    def close_trade(self):
+        """Закрыввааем торговлю"""
+
+        if self.from_order:
+            from_order = self.from_order
+            from_order.status = MarketMyOrder.Status.CLOSED
+            from_order.save()
 
     def close_order(self):
 
