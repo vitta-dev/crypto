@@ -81,7 +81,7 @@ class BotBase:
         self.bot.update_current_price(self.res_ticker_data, self.market)
         self.ticker_data = convert_ticker_to_decimal(self.res_ticker_data)
 
-    def get_chart_data(self, tick_interval=TICKINTERVAL_FIVEMIN, hours=None, ):
+    def get_chart_data(self, tick_interval=TICKINTERVAL_FIVEMIN, hours=None, ) -> OrderedDict:
         # Получаем с биржи данные, необходимые для построения индикаторов
         print('get_chart_data')
         chart_data = OrderedDict()
@@ -855,11 +855,9 @@ class BotBase:
 
                     order.status = MarketMyOrder.Status.FILLED
                     order.save()
-                    # TODO: вынести закрытие основного ордера в отдельный метод в модель MarketMyOrder
+
                     if order.type == MarketMyOrder.Type.SELL and order.from_order:
-                        from_order = order.from_order
-                        from_order.status = MarketMyOrder.Status.CLOSED
-                        from_order.save()
+                        order.close_trade()
 
                     # сохраняем в лог изменение валюты ExchangeCurrencyStatistic
                     try:

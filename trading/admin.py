@@ -445,6 +445,9 @@ class MarketBotAdmin(admin.ModelAdmin):
         (None, {
             'fields': (('max_spend', 'markup', 'order_life_time',), )
         }),
+        ('UT BOT', {
+            'fields': (('ut_sensitivity', 'ut_atr_period'), )
+        }),
         ('Стратегия усреднения', {
             'fields': ('is_average_safety',
                        ('average_safety_start_order_amount', 'average_safety_orders_amount',
