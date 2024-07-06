@@ -591,7 +591,7 @@ class ApiBinance(object):
 
         rate, quantity = self.check_price(market_name, rate, quantity)
 
-        print('quantity', quantity)
+        # print('quantity', quantity)
         # if not self.check_notional(quantity, rate, market_settings.settings):
         #     print_debug('MIN_NOTIONAL - итоговая сумма ордера (объем*цена) должна быть выше minNotional')
         #     return False
@@ -607,6 +607,7 @@ class ApiBinance(object):
                 price=rate,
             )
             print('test real result', result)
+            print('time.sleep(30)')
             time.sleep(30)
 
             result = {

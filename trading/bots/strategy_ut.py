@@ -34,7 +34,7 @@ class BotUT(BotBase):
             self.get_tickers()
 
             if order.type == MarketMyOrder.Type.SELL:
-
+                print('----- CHECK SELL ---')
                 # если выполнился ордер на продажу
                 if order.status == MarketMyOrder.Status.FILLED:
                     # фиксируем историю баланса
@@ -42,20 +42,29 @@ class BotUT(BotBase):
                     hb.order = order.from_order
                     hb.save()
                     # закрываем сделку
-                    order.close_trade()
+                    print('закрываем сделку')
+                    order.from_order.close_trade()
 
             if order.type == MarketMyOrder.Type.BUY:
                 print_debug('---------- CHECK BUY --------')
+
                 if (order.status == MarketMyOrder.Status.FILLED
                         and not order.is_close
                         and order.kind == MarketMyOrder.Kind.MAIN):
 
-                    # проверяем сигнал на продажу
-                    trend_sell = self.check_trend_sell()
-                    if trend_sell:
-                        print('trend_sell', trend_sell)
-                        # выставляем ордер на продажу
-                        self.create_sell_by_current_price(order)
+                    # проверяем есть ли ордера на продажу
+                    sell_open_orders = MarketMyOrder.open_objects.filter(from_order=order, type='SELL')
+                    sell_close_orders = MarketMyOrder.close_objects.filter(from_order=order, type='SELL')
+                    if sell_close_orders:
+                        # Закрываем сделку (функционал для тестов)
+                        order.close_trade()
+
+                    if not sell_open_orders and not sell_close_orders:
+                        # проверяем сигнал на продажу
+                        trend_sell = self.check_trend_sell()
+                        if trend_sell:
+                            # выставляем ордер на продажу
+                            self.create_sell_by_current_price(order)
 
                 if order.status in [MarketMyOrder.Status.OPEN]:
                     # Если buy не был исполнен, и прошло достаточно времени для отмены ордера, отменяем
@@ -214,6 +223,8 @@ class BotUT(BotBase):
         pd_data = self.get_trends_ut(pd_data)
 
         return pd_data['Buy'].values[-1]
+        # return True
+        # return False
 
     def get_trends_sell_ut(self, pd_data: pd.DataFrame) -> bool:
         """Проверяем тренд на продажу"""
@@ -221,3 +232,5 @@ class BotUT(BotBase):
         pd_data = self.get_trends_ut(pd_data)
 
         return pd_data['Sell'].values[-1]
+        # return True
+        # return False

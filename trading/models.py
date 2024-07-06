@@ -267,19 +267,6 @@ class CloseOrders(models.Manager):
     def get_queryset(self):
         qs = super().get_queryset()
         qs = qs.filter(status__in=[MarketMyOrder.Status.FILLED, MarketMyOrder.Status.CLOSED])
-        # qs = qs.exclude(Q(status__in=[MarketMyOrder.Status.CLOSED, MarketMyOrder.Status.CANCELED]) | Q(is_close=True))
-        # qs = qs.filter(
-        #     Q(cancelled_at__isnull=True),
-        #     Q(
-        #         Q(type=MarketMyOrder.Type.SELL, status__in=[MarketMyOrder.Status.OPEN,
-        #                                                     MarketMyOrder.Status.PART_FILLED])
-        #         |
-        #         Q(type=MarketMyOrder.Type.BUY, status__in=[MarketMyOrder.Status.OPEN,
-        #                                                    MarketMyOrder.Status.PART_FILLED,
-        #                                                    MarketMyOrder.Status.FILLED
-        #                                                    ])
-        #     )
-        # )
 
         return qs
 
@@ -858,9 +845,12 @@ class MarketMyOrder(models.Model):
         """Закрыввааем торговлю"""
 
         if self.from_order:
-            from_order = self.from_order
-            from_order.status = MarketMyOrder.Status.CLOSED
-            from_order.save()
+            close_order = self.from_order
+        else:
+            close_order = self
+        close_order.status = MarketMyOrder.Status.CLOSED
+        close_order.save()
+        print('CLOSED TRADE', close_order)
 
     def close_order(self):
 

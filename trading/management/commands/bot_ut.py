@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
             # проверяем статусы открытых ордеров
             orders = MarketMyOrder.open_objects.filter(bot=bot)
-
+            print('# проверяем статусы открытых ордеров', orders)
             if orders:
                 for order in orders:
                     order.refresh_from_db()
@@ -46,11 +46,6 @@ class Command(BaseCommand):
 
             for market in markets:
                 tb = BotUT(bot, market)
-                # trend_buy = tb.check_trend_buy()
-                # print('trend_buy', trend_buy)
-                #
-                # trend_sell = tb.check_trend_sell()
-                # print('trend_sell', trend_sell)
 
                 if bot_active_pairs > bot.max_rank_pairs:
                     continue

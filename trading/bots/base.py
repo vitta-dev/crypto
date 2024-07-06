@@ -438,7 +438,7 @@ class BotBase:
                 return order
         return False
 
-    def place_order(self, order_amount, rate, spent, from_order):
+    def place_order(self, order_amount, rate, spent, from_order) -> Optional['MarketMyOrder']:
         """Размещаем ордер на бирже"""
         order_res = self.api.sell_limit(
             self.market_name,
