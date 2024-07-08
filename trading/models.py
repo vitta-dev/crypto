@@ -941,7 +941,7 @@ class MarketMyOrder(models.Model):
             else:
                 total_spent += so.price * so.amount + so.price * so.amount / 100 * commission
 
-        average_price = total_spent / total_amount
+        average_price = total_spent / total_amount if total_amount else 0
 
         return total_amount, average_price
 
