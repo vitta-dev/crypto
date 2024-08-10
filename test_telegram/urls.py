@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls import path
 
 from .views import test_webhook_data, view_webhook_data
 
 
 urlpatterns = [
-    url('^bot$', test_webhook_data),
-    url('^view$', view_webhook_data),
+    path('bot', test_webhook_data),
+    path('view', view_webhook_data),
 ]

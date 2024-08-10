@@ -13,17 +13,22 @@ from trading.models import (
 from trading.utils import add_stock_fee
 
 
+@admin.register(CheckMarketFilter)
 class CheckMarketFilterAdmin(admin.ModelAdmin):
     list_display = ('symbol', 'created_at', 'maxPrice', 'minPrice', 'tickSize', 'p_avgPriceMins', 'multiplierUp',
                     'multiplierDown', 'maxQty', 'minQty', 'stepSize', 'minNotional', 'n_avgPriceMins', 'applyToMarket',
                     'limit', 'maxNumAlgoOrders')
 
 
+@admin.register(ExchangeCurrencyStatistic)
 class ExchangeCurrencyStatisticAdmin(admin.ModelAdmin):
     list_display = ('currency', 'created_at', 'order', 'free', 'locked', 'total', 'operation', 'price', 'usdt')
     list_filter = ['operation', ]
     search_fields = ['currency__name', ]
 
+    @admin.display(
+        description='Total'
+    )
     def total(self, obj):
         """
         Ticker data
@@ -35,14 +40,14 @@ class ExchangeCurrencyStatisticAdmin(admin.ModelAdmin):
 
         return total
 
-    total.short_description = 'Total'
-    total.allow_tags = True
 
 
+@admin.register(MarketTickInterval)
 class MarketTickIntervalAdmin(admin.ModelAdmin):
     list_display = ('name', 'value', 'value_binance')
 
 
+@admin.register(Currency)
 class CurrencyAdmin(admin.ModelAdmin):
     list_display = ('name', 'name_long', 'coin_type', 'tx_fee', 'min_confirmation', 'is_active', 'is_base')
 
@@ -59,7 +64,7 @@ class CurrencyAdmin(admin.ModelAdmin):
     )
 
     list_filter = ['coin_type', 'is_active', 'is_base']
-    list_editable = ['is_base']
+    # list_editable = ['is_base']
     search_fields = ['name', ]
 
 
@@ -69,6 +74,9 @@ class MarketSettingsInline(admin.TabularInline):
     model = MarketSettings
     extra = 0
 
+    @admin.display(
+        description='settings'
+    )
     def settings_info(self, obj):
         """
         Settings
@@ -80,20 +88,20 @@ class MarketSettingsInline(admin.TabularInline):
         # return '<code>{}</code>'.format(obj.settings)
         # return '{}'.format(obj.settings)
 
-    settings_info.short_description = 'settings'
-    settings_info.allow_tags = True
 
 
+@admin.register(Market)
 class MarketAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'min_trade_size', 'is_active', 'is_active_binance', 'is_bot', 'created_at',)
     fields = ['name', 'base_currency', 'market_currency', 'min_trade_size', 'is_active',  'is_active_binance', 'created_at', 'updated_at']
     list_filter = ['is_active', 'is_bot', 'base_currency']
-    list_editable = ['is_bot', ]
+    # list_editable = ['is_bot', ]
     search_fields = ['name', ]
     readonly_fields = ['created_at', 'updated_at']
     inlines = [MarketSettingsInline]
 
 
+@admin.register(BotStat)
 class BotStatAdmin(admin.ModelAdmin):
     list_display = ('date', 'bot', 'market', 'buy', 'buy_sum', 'sell', 'sell_sum')
     fields = ['date', 'bot', 'market', 'buy', 'buy_sum', 'sell', 'sell_sum']
@@ -101,6 +109,7 @@ class BotStatAdmin(admin.ModelAdmin):
     search_fields = ['market__name', ]
 
 
+@admin.register(MarketSummary)
 class MarketSummaryAdmin(admin.ModelAdmin):
     list_display = ('id', 'market', 'rank', 'updated_at', 'high', 'low', 'volume', 'last', 'base_volume', 'bid', 'ask', 'open_by_orders',
                     'open_sell_orders', 'prev_day')
@@ -123,6 +132,9 @@ class MarketOrderLogInline(admin.TabularInline):
     extra = 0
     formset = MarketOrderLogFormSet
 
+    @admin.display(
+        description='Ticker data'
+    )
     def tickers(self, obj):
         """
         Ticker data
@@ -140,9 +152,10 @@ class MarketOrderLogInline(admin.TabularInline):
 
         return format_html(str_format)
 
-    tickers.short_description = 'Ticker data'
-    tickers.allow_tags = True
 
+    @admin.display(
+        description='Bot data'
+    )
     def bot_data_display(self, obj):
         """
         Ticker data
@@ -160,10 +173,9 @@ class MarketOrderLogInline(admin.TabularInline):
 
         return format_html(str_format)
 
-    bot_data_display.short_description = 'Bot data'
-    bot_data_display.allow_tags = True
 
 
+@admin.register(MarketMyOrder)
 class MarketMyOrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'type', 'kind', 'status', 'created_at', 'filled_at', 'cancelled_at', 'charts',
                     'format_price', 'format_amount', 'format_spent', 'format_commission', 'profit', 'wait_price',
@@ -197,40 +209,47 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     inlines = [MarketOrderLogInline]
 
+    @admin.display(
+        description='Price',
+        ordering='price',
+    )
     def format_price(self, obj):
 
         return ("%0.8f" % obj.price).rstrip('0').rstrip('.')
 
-    format_price.short_description = 'Price'
-    format_price.allow_tags = True
-    format_price.admin_order_field = 'price'
 
+    @admin.display(
+        description='amount',
+        ordering='amount',
+    )
     def format_amount(self, obj):
 
         return ("%0.8f" % obj.amount).rstrip('0').rstrip('.')
 
-    format_amount.short_description = 'amount'
-    format_amount.allow_tags = True
-    format_amount.admin_order_field = 'amount'
 
+    @admin.display(
+        description='spent',
+        ordering='spent',
+    )
     def format_spent(self, obj):
 
         return ("%0.8f" % obj.spent).rstrip('0').rstrip('.')
 
-    format_spent.short_description = 'spent'
-    format_spent.allow_tags = True
-    format_spent.admin_order_field = 'spent'
 
+    @admin.display(
+        description='commission',
+        ordering='commission',
+    )
     def format_commission(self, obj):
         if not obj.commission:
             return '--'
 
         return ("%0.8f" % obj.commission).rstrip('0').rstrip('.')
 
-    format_commission.short_description = 'commission'
-    format_commission.allow_tags = True
-    format_commission.admin_order_field = 'commission'
 
+    @admin.display(
+        description='Пара'
+    )
     def charts(self, obj):
         """
         Список менеджеров проекта
@@ -241,9 +260,10 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
         str_format = '<a href="{}" target="_blank">{}</a>'
         return format_html(str_format, reverse('trading:chart-market-bot', args=(obj.market.name, obj.bot.name)), obj.market.name)
 
-    charts.short_description = 'Пара'
-    charts.allow_tags = True
 
+    @admin.display(
+        description='Ticker data'
+    )
     def tickers(self, obj):
         """
         Ticker data
@@ -261,9 +281,10 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
 
         return format_html(str_format)
 
-    tickers.short_description = 'Ticker data'
-    tickers.allow_tags = True
 
+    @admin.display(
+        description='Get Order Result'
+    )
     def order_info(self, obj):
         """
         Ticker data
@@ -286,9 +307,10 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
 
         return format_html(str_format)
 
-    order_info.short_description = 'Get Order Result'
-    order_info.allow_tags = True
 
+    @admin.display(
+        description='Max Price'
+    )
     def max_price(self, obj):
         """
         max_price
@@ -313,9 +335,10 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
                     return format_html('{} - {}%', "%0.8f" % max_price, "%0.8f" % per)
         return '--'
 
-    max_price.short_description = 'Max Price'
-    max_price.allow_tags = True
 
+    @admin.display(
+        description='Wait Price'
+    )
     def wait_price(self, obj):
         """
         max_price
@@ -350,9 +373,10 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
 
         return format_html(str_format)
 
-    wait_price.short_description = 'Wait Price'
-    wait_price.allow_tags = True
 
+    @admin.display(
+        description='Current Data'
+    )
     def current_data(self, obj):
         """
         max_price
@@ -372,9 +396,10 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
 
         return format_html(str_format)
 
-    current_data.short_description = 'Current Data'
-    current_data.allow_tags = True
 
+    @admin.display(
+        description='Profit'
+    )
     def profit(self, obj):
         """
         :param obj:
@@ -405,10 +430,9 @@ class MarketMyOrderAdmin(admin.ModelAdmin):
 
         return str_format
 
-    profit.short_description = 'Profit'
-    profit.allow_tags = True
 
 
+@admin.register(MarketBotRank)
 class MarketBotRankAdmin(admin.ModelAdmin):
     list_display = ('market', 'bot', 'rank', 'max_price', 'is_block_trade', 'block_trade_at')
     fields = ['market', 'bot', 'rank', 'max_price', 'is_block_trade', 'block_trade_at']
@@ -424,33 +448,38 @@ class MarketBotRankInline(admin.TabularInline):
     extra = 0
 
 
+@admin.register(MarketBot)
 class MarketBotAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bot_form_change.html'
     save_as = True
     list_display = ['name', 'exchange', 'is_test', 'bot_last_run', 'max_spend', 'markup', 'order_life_time',
                     'test_bot', 'stat_bot']
-    # fields = ['name', 'is_test', 'max_spend', 'markup', 'order_life_time',
-    #           ('is_ema', ),
-    #           ('is_rsi', ),
-    #           ('is_macd', ),
-    #           'tick_intervals']
+
     readonly_fields = ['block_panic_sell_at']
+    filter_horizontal = ['tick_intervals', 'markets']
     fieldsets = (
         (None, {
-            'fields': ('name', 'exchange', 'is_test', 'is_ha')
+            'fields': (
+                'name', 'exchange', 'is_test', 'is_ha',
+                ('average_safety_start_order_amount', 'max_spend', 'markup', 'order_life_time'),
+                ('tick_intervals',),
+                ('markets',),
+                ('is_green', 'is_dodge', 'is_hummer', 'is_sword', 'is_sword_or_hummer', 'is_simple', 'is_fat'),
+                ('is_min_value', 'min_value',),
+                ('is_compare_value',),
+                ('is_ratio_open_close', 'ratio_open_close'),
+            )
+        }),
+
+        ('UT BOT', {
+            'fields': (('ut_sensitivity', 'ut_atr_period'), )
         }),
         ('Panic Sell', {
             'fields': (('is_block_panic_sell', 'block_panic_sell_at'), )
         }),
-        (None, {
-            'fields': (('max_spend', 'markup', 'order_life_time',), )
-        }),
-        ('UT BOT', {
-            'fields': (('ut_sensitivity', 'ut_atr_period'), )
-        }),
         ('Стратегия усреднения', {
             'fields': ('is_average_safety',
-                       ('average_safety_start_order_amount', 'average_safety_orders_amount',
+                       ('average_safety_orders_amount',
                         'average_safety_orders_max_count',
                         'average_safety_orders_active_count', 'average_safety_price_change',
                         'average_safety_ratio', 'average_safety_step'),
@@ -463,16 +492,8 @@ class MarketBotAdmin(admin.ModelAdmin):
         ('Stop Loss', {
             'fields': ('stop_loss', 'stop_loss_block_trade', )
         }),
-        (None, {
-            'fields': ('tick_intervals', )
-        }),
-
         ('Пары по рангу', {
             'fields': ('is_market_rank', 'max_rank_pairs', 'rank_base_currency',)
-        }),
-
-        ('Пары', {
-            'fields': ('markets',)
         }),
         ('MACD', {
             'fields': ('is_macd', 'is_macd_cross_bottom_to_top',
@@ -492,36 +513,15 @@ class MarketBotAdmin(admin.ModelAdmin):
         ('EMA', {
             'fields': ('is_ema', ('ema_fastperiod', 'ema_slowperiod')),
         }),
-
-        ('', {
-            'fields': ('is_green', 'is_dodge', 'is_hummer', 'is_sword', 'is_sword_or_hummer', 'is_simple', 'is_fat'),
-        }),
-
-        ('', {
-            'fields': (('is_min_value', 'min_value',), ),
-        }),
-
-        ('', {
-            'fields': ('is_compare_value', ),
-        }),
-
-        ('', {
-            'fields': (('is_ratio_open_close', 'ratio_open_close'), ),
-        }),
-
         ('SMA', {
             'fields': ('is_sma', 'sma_timeperiod', 'is_sma_cross_bottom_to_top',
                        ('sma_fastperiod', 'sma_slowperiod')),
         }),
-
-
-
     )
 
-    # list_display = ['name', 'is_test', 'max_spend', 'currency']
-    filter_horizontal = ['tick_intervals', 'markets']
-    # inlines = [MarketBotRankInline, ]
-
+    @admin.display(
+        description='Тестирование'
+    )
     def test_bot(self, obj):
         """
         Тестирование бота
@@ -532,9 +532,9 @@ class MarketBotAdmin(admin.ModelAdmin):
         str_format = '<a href="{}" target="_blank">test</a>'
         return format_html(str_format, reverse('trading:test-bot', args=(obj.name, )))
 
-    test_bot.short_description = 'Тестирование'
-    test_bot.allow_tags = True
-
+    @admin.display(
+        description='Статистика'
+    )
     def stat_bot(self, obj):
         """
         Статистиска бота
@@ -545,16 +545,16 @@ class MarketBotAdmin(admin.ModelAdmin):
         str_format = '<a href="{}" target="_blank"><i class="fa fa-table"></i></a>'
         return format_html(str_format, reverse('trading:stats-bot', args=(obj.name, )))
 
-    stat_bot.short_description = 'Статистика'
-    stat_bot.allow_tags = True
-
-
+@admin.register(BotTestOrder)
 class BotTestOrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'type', 'status', 'created_at', 'charts', 'price', 'bot', 'tickers')
     list_filter = ['type', 'status', 'bot']
     search_fields = ['market__name', ]
     date_hierarchy = 'created_at'
 
+    @admin.display(
+        description='Пара'
+    )
     def charts(self, obj):
         """
         Список менеджеров проекта
@@ -566,9 +566,10 @@ class BotTestOrderAdmin(admin.ModelAdmin):
         return format_html(str_format, reverse('trading:test-bot-market', args=(obj.bot.name, obj.market.name)),
                            obj.market.name)
 
-    charts.short_description = 'Пара'
-    charts.allow_tags = True
 
+    @admin.display(
+        description='Ticker data'
+    )
     def tickers(self, obj):
         """
         Ticker data
@@ -583,24 +584,11 @@ class BotTestOrderAdmin(admin.ModelAdmin):
 
         return str_format
 
-    tickers.short_description = 'Ticker data'
-    tickers.allow_tags = True
 
 
+@admin.register(HistoryBalance)
 class HistoryBalanceAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'btc', 'bnb', 'usdt', 'order')
     readonly_fields = ['created_at', 'btc', 'bnb', 'usdt', 'order']
 
 
-admin.site.register(Currency, CurrencyAdmin)
-admin.site.register(ExchangeCurrencyStatistic, ExchangeCurrencyStatisticAdmin)
-admin.site.register(Market, MarketAdmin)
-admin.site.register(MarketSummary, MarketSummaryAdmin)
-admin.site.register(MarketMyOrder, MarketMyOrderAdmin)
-admin.site.register(MarketBot, MarketBotAdmin)
-admin.site.register(MarketBotRank, MarketBotRankAdmin)
-admin.site.register(BotTestOrder, BotTestOrderAdmin)
-admin.site.register(BotStat, BotStatAdmin)
-admin.site.register(CheckMarketFilter, CheckMarketFilterAdmin)
-admin.site.register(MarketTickInterval, MarketTickIntervalAdmin)
-admin.site.register(HistoryBalance, HistoryBalanceAdmin)

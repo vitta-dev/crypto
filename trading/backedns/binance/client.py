@@ -67,7 +67,8 @@ class ApiBinance(object):
                 'auth': auth_basic,
             }
 
-        self.api = Client(API_KEY, SECRET_KEY, requests_params=request_params, tld='com')
+        # self.api = Client(API_KEY, SECRET_KEY, requests_params=request_params, tld='com')
+        self.api = Client(API_KEY, SECRET_KEY, tld='com')
         # self.api = Client(API_KEY, SECRET_KEY, requests_params=request_params)
         # self.api = Client(API_KEY, SECRET_KEY, base_url='https://fapi.binance.com')
         # self.api = Client(API_KEY, SECRET_KEY, tld='us')

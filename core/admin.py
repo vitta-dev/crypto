@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.forms.models import BaseInlineFormSet
 from django.urls import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 from core.models import SystemMonitor, BotLog

@@ -8,7 +8,8 @@ import logging
 import time
 from decimal import Decimal
 
-from collections import Iterable
+# from collections import Iterable
+from collections.abc import Iterable
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 
