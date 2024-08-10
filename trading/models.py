@@ -12,7 +12,7 @@ from django.db.models import Q
 try:
     from django.db.models import JSONField
 except ImportError:
-    from django.contrib.postgres.fields import JSONField
+    from django.db.models import JSONField
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 

@@ -94,7 +94,7 @@ class BotUT(BotBase):
         # отменяем ордер на продажу
         self.cancel_sell_order(from_order)
 
-        # выставляем ордер на продажу по текущему курсу
+        # выставляем ордер на продажу по текущему курсу проверка курса
         total_amount, average_price = from_order.get_amount_for_sell_new()
         rate = self.get_price_for_sell()
         order_spent = Decimal(total_amount * rate)

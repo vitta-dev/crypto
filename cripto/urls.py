@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.urls import include, path
 from django.contrib import admin
 from django.conf import settings
 from django.urls import path
@@ -31,7 +31,11 @@ from django.urls import path
 #     url('^telegram/', include('test_telegram.urls', namespace='telegram')),
 # ]
 
+def trigger_error(request):
+    division_by_zero = 1 / 0
+
 urlpatterns = [
+    path('sentry-debug/', trigger_error),
     # path('e5c9247a98c58dda4e6749fe081fb79a/', admin.site.urls),
     # path('e5c9247a98c58dda4e6749fe081fb79a/statistic/', include(('statistic.urls', 'statistic'), namespace='statistic')),
     path('e5c9247a98c58dda4e6749fe081fb79a/tr/', include(('trading.urls', 'trading'), namespace='trading')),
@@ -40,6 +44,8 @@ urlpatterns = [
     # url('^e5c9247a98c58dda4e6749fe081fb79a/stat/', include(('statistic.urls', 'statistic'), namespace='stat')),
     # url(r'^e5c9247a98c58dda4e6749fe081fb79a/stat/', include(('statistic.urls', 'statistic'), namespace='statistic')),
     # path('telegram/', include(('test_telegram.urls', 'telegram'), namespace='telegram')),
+    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
+    path('jet/', include('jet.urls', 'jet')),
     path('e5c9247a98c58dda4e6749fe081fb79a/', admin.site.urls),
 ]
 
@@ -59,6 +65,6 @@ if settings.DEBUG:
 
     import debug_toolbar
     urlpatterns += (
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        path('__debug__/', include(debug_toolbar.urls)),
     )
 

@@ -1,5 +1,5 @@
 {% extends base_tpl %}
-{% load i18n static bootstrapped_goodies_tags humanize %}
+{% load i18n static humanize %}
 {% block title %}Статистика{% endblock %}
 {% block extrascript %}
     <script>
@@ -8,7 +8,7 @@
         })
     </script>
 {% endblock %}
-{% block main_content %}
+{% block content %}
     <h1>Статистика {% if bot %}{{ bot.name }}{% endif %}</h1>
     <div class="row">
         {% for v, s in stats.items %}

@@ -1581,6 +1581,9 @@ class BotBase:
         :return:
         """
         # return ticker_data['Bid'] - satoshi_1
+        # get_avg_price
+        # r = self.get_avg_price(self.market_name)
+        # price = Decimal(r.get('price', 0))
         rate = Decimal(self.ticker_data.get('Bid', 0))
         try:
             rate = rate.quantize(Decimal('.00000000'))
@@ -1594,6 +1597,7 @@ class BotBase:
         :return:
         """
         # return ticker_data['Ask'] - satoshi_1
+        # проверить стоимость продажи
         rate = Decimal(self.ticker_data.get('Ask', 0))
         try:
             rate = rate.quantize(Decimal('.00000000'))

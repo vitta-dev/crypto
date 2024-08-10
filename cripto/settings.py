@@ -32,8 +32,9 @@ ALLOWED_HOSTS = ['138.68.5.234']
 # Application definition
 
 INSTALLED_APPS = [
-
-    'pocket_admin',
+    'jet.dashboard',
+    'jet',
+    # 'pocket_admin',
 
     # 'suitlocale',
     # 'suit',
@@ -132,7 +133,6 @@ TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
-USE_L10N = True
 
 USE_TZ = True
 
@@ -191,6 +191,8 @@ BINANCE_COMMISSION_BNB = '0.075'
 PROXIES = {}
 PROXY_LOGIN = ''
 PROXY_PASS = ''
+
+JET_DEFAULT_THEME = 'light-gray'
 
 try:
     from .settings_local import *
