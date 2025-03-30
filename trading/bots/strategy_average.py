@@ -46,8 +46,9 @@ class BotAverage(BotBase):
 
             if order.type == MarketMyOrder.Type.BUY:
                 print_debug('---------- CHECK BUY --------')
-                if order.status == MarketMyOrder.Status.FILLED and not order.is_close \
-                        and order.kind == MarketMyOrder.Kind.MAIN:
+                if (order.status == MarketMyOrder.Status.FILLED
+                        and not order.is_close
+                        and order.kind == MarketMyOrder.Kind.MAIN):
 
                     # if not self.check_create_fix_order(order):
                     # проверяем страховочные ордера
@@ -234,7 +235,7 @@ class BotAverage(BotBase):
         return self.add_stock_fee(price + price * self.bot.markup / 100)
 
     def create_fix_sell(self, from_order: MarketMyOrder) -> Union[MarketMyOrder, bool]:
-        """Проверяем есть ли ордер на продажу"""
+        """Создаем ордер на продажу"""
 
         new_sell_order = False
 
@@ -294,6 +295,7 @@ class BotAverage(BotBase):
 
         order_spent = Decimal(total_amount * min_profit_price)
         sell_order = self.place_order(total_amount, min_profit_price, order_spent, order)
+        # TODO: сделать отправку в бота
         if sell_order:
             print('sell_order', sell_order)
             return sell_order
