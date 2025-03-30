@@ -908,10 +908,7 @@ class MarketMyOrder(models.Model):
         orders_buy_count = 1
 
         # получаем данные по основному ордеру
-        if self.from_order:
-            from_order = self.from_order
-        else:
-            from_order = self
+        from_order = self.from_order if self.from_order else self
 
         total_amount = from_order.amount
         sum_prices = from_order.price
@@ -919,6 +916,8 @@ class MarketMyOrder(models.Model):
         if from_order.commission:
             total_spent = from_order.spent + from_order.commission
         else:
+            # странно, почему не считаю from_order.spent, а считаю через price * amount
+            # TODO: проверить как выставлять комиссию
             total_spent = from_order.price * from_order.amount + (
                     from_order.price * from_order.amount / 100 * commission
             )

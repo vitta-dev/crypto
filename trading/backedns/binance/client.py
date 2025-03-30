@@ -15,7 +15,7 @@ from trading.models import Currency, Market, MarketSettings, Exchange
 from django.conf import settings
 
 
-client = Client(API_KEY, SECRET_KEY)
+# client = Client(API_KEY, SECRET_KEY)
 
 
 class ApiBinance(object):
